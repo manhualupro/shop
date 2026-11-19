@@ -5,39 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>我的网站</title>
 <style>
-  html,body{height:100%;margin:0;background:#0b0f1a}
-  #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa7bd;font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:#fff}
-  #err{display:none}
-  iframe{border:0;width:100%;height:100%;position:fixed;inset:0}
+  html,body{height:100%;margin:0;background:#fff}
+  #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#8a90a0;font:13px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:#fff;z-index:9}
+  #load img{width:126px;height:126px;object-fit:contain;animation:falls 1.5s ease-in-out infinite}
+  @keyframes falls{0%{transform:translateY(-16px) rotate(-4deg);opacity:0}55%{opacity:1}100%{transform:translateY(18px) rotate(4deg);opacity:.85}}
+  iframe{border:0;width:100%;height:100%;position:fixed;inset:0;display:none}
 </style>
 </head>
 <body>
-<div id="load"><span id="tip">正在打开网站…</span></div>
-<iframe id="fr" style="display:none"></iframe>
+<div id="load"><img id="loadimg" alt="loading"><span id="tip">正在打开网站…</span></div>
+<iframe id="fr"></iframe>
 <script>
 (function(){
   var SB='https://fjarlttqnznykmvlsxma.supabase.co/storage/v1/object/public/sites/';
+  var HOST='https://manhualupro.github.io/shop/';
   function qs(k){var m=new RegExp('[?&]'+k+'=([^&]*)').exec(location.search);return m?decodeURIComponent(m[1]):''}
   var site=qs('s'), page=qs('p')||'index.html';
-  var tip=document.getElementById('tip');
+  var tip=document.getElementById('tip'), loadBox=document.getElementById('load');
   if(!site){tip.textContent='缺少站点标识（链接里的 s 参数）';return}
   var base=SB+encodeURIComponent(site)+'/';
+
+  /* ---------- 内置插件配置（App 里开关后写进站点目录） ---------- */
+  var cfg={};
+  function readCfg(cb){
+    fetch(base+'plugins.json?t='+Date.now()).then(function(r){return r.ok?r.json():{}})
+      .then(function(j){cfg=(j&&typeof j==='object')?j:{};cb()})
+      .catch(function(){cfg={};cb()});
+  }
+
   function grab(p){return fetch(base+p+'?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()})}
-  grab(page).catch(function(){
-    if(page==='index.html')return grab('index.htm');
-    throw 0;
-  }).catch(function(){return grab('index.html')}).then(function(txt){
-    // 注入 base，保证图片、音乐、css 的相对路径都能取到
-    var inject='<base href="'+base+'">';
-    if(/<head[^>]*>/i.test(txt)){txt=txt.replace(/<head([^>]*)>/i,function(m,a){return '<head'+a+'>'+inject})}
-    else{txt=inject+txt}
-    var fr=document.getElementById('fr');
-    fr.onload=function(){document.getElementById('load').style.display='none';fr.style.display='block'};
-    fr.srcdoc=txt;
-    setTimeout(function(){document.getElementById('load').style.display='none';fr.style.display='block'},1200);
-  }).catch(function(){
-    tip.innerHTML='没找到这个网站：<b>'+site.replace(/[<>&]/g,'')+'</b><br>① 进 App 点「个人网站」确认后缀是这一个；<br>② 如果刚重新上传，等 1 分钟再刷新；<br>③ 还是不行就在 App 里点「重新部署」重新上传一次。';
+
+  readCfg(function(){
+    if(cfg.load){ document.getElementById('loadimg').src = cfg.loadimg || (HOST+'loadgirl.png'); }
+    else { document.getElementById('loadimg').style.display='none'; }
+
+    grab(page).catch(function(){
+      if(page==='index.html')return grab('index.htm');
+      throw 0;
+    }).catch(function(){return grab('index.html')}).then(function(txt){
+      var inject='<base href="'+base+'">';
+      if(/<head[^>]*>/i.test(txt)){txt=txt.replace(/<head([^>]*)>/i,function(m,a){return '<head'+a+'>'+inject})}
+      else{txt=inject+txt}
+      var fr=document.getElementById('fr');
+      fr.onload=function(){
+        applyPlugins(fr);
+        setTimeout(function(){loadBox.style.display='none';fr.style.display='block'}, cfg.load?900:250);
+      };
+      fr.srcdoc=txt;
+      setTimeout(function(){loadBox.style.display='none';fr.style.display='block';try{applyPlugins(fr)}catch(e){}}, cfg.load?2600:1500);
+    }).catch(function(){
+      tip.innerHTML='没找到这个网站：<b>'+site.replace(/[<>&]/g,'')+'</b><br>① 进 App 点「个人网站」确认后缀是这一个；<br>② 如果刚重新上传，等 1 分钟再刷新；<br>③ 还是不行就在 App 里点「重新部署」重新上传一次。';
+    });
   });
+
+  /* ---------- 把插件效果注入到网站内部 ---------- */
+  var DICT=[['立即购买','Buy now'],['加入购物车','Add to cart'],['购物车','Cart'],['首页','Home'],
+    ['全部商品','Products'],['商品','Products'],['价格','Price'],['库存','Stock'],['数量','Qty'],
+    ['规格','Options'],['搜索','Search'],['登录','Sign in'],['注册','Sign up'],['退出','Sign out'],
+    ['我的订单','My orders'],['订单','Orders'],['立即支付','Pay'],['支付','Pay'],['确认','Confirm'],
+    ['取消','Cancel'],['提交','Submit'],['联系 TA','Contact'],['联系方式','Contact'],['客服','Support'],
+    ['关于我们','About'],['公告','Notice'],['暂无','None'],['分类','Category'],['详情','Details'],
+    ['已售','Sold'],['收藏','Favorite'],['分享','Share'],['返回','Back'],['更多','More'],['新品','New']];
+  function applyPlugins(fr){
+    var doc=null;
+    try{ doc=fr.contentDocument }catch(e){}
+    if(!doc||!doc.documentElement)return;
+
+    /* 1. 液态玻璃 UI */
+    if(cfg.glass){
+      var st=doc.createElement('style'); st.id='__glass';
+      st.textContent='body{background-attachment:fixed}'
+        +'div,section,article,li,button,a.header,.card,.box{backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}'
+        +'div[style*="background"],.card,.box{border:1px solid rgba(255,255,255,.55)!important;border-radius:16px!important;'
+        +'box-shadow:0 10px 30px rgba(31,58,120,.14),inset 0 1px 0 rgba(255,255,255,.7)!important}';
+      doc.head.appendChild(st);
+    }
+
+    /* 2. 背景图 */
+    if(cfg.bg){
+      var st2=doc.createElement('style'); st2.id='__bg';
+      st2.textContent='html{background:transparent!important}'
+        +'body{background-image:url("'+(cfg.bgimg||(HOST+'bg.jpg'))+'")!important;'
+        +'background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;'
+        +'background-attachment:fixed!important;min-height:100vh}'
+        +'body>.wrap,body>#app,.page,.container{background:rgba(255,255,255,.02)!important}';
+      doc.head.appendChild(st2);
+    }
+
+    /* 3. 中英文切换 */
+    if(cfg.lang){
+      if(doc.getElementById('__langchip'))return;
+      var chip=doc.createElement('button'); chip.id='__langchip'; chip.type='button';
+      chip.textContent='中文 / English ▾';
+      chip.style.cssText='position:fixed;right:12px;top:12px;z-index:2147483000;height:32px;padding:0 14px;border:0;border-radius:999px;'
+        +'background:rgba(255,255,255,.95);color:#2f6df6;font:700 13px -apple-system,"PingFang SC",sans-serif;'
+        +'box-shadow:0 6px 18px rgba(30,60,120,.18);cursor:pointer';
+      var en=false, saved=[];
+      chip.onclick=function(){
+        en=!en;
+        if(en){
+          saved=[];
+          var walk=doc.createTreeWalker(doc.body,NodeFilter.SHOW_TEXT,null);
+          var n;
+          while((n=walk.nextNode())){
+            var t=n.nodeValue, tr=t;
+            for(var i=0;i<DICT.length;i++){tr=tr.split(DICT[i][0]).join(DICT[i][1])}
+            if(tr!==t){saved.push([n,t]);n.nodeValue=tr}
+          }
+          chip.textContent='English / 中文 ▾';
+        }else{
+          saved.forEach(function(p){try{p[0].nodeValue=p[1]}catch(e){}});
+          saved=[];chip.textContent='中文 / English ▾';
+        }
+      };
+      (doc.body||doc.documentElement).appendChild(chip);
+    }
+  }
 })();
 </script>
 </body>

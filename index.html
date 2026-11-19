@@ -199,9 +199,23 @@ body.b2body{background:#f4f6fa}
 .cfoot input{flex:1 1 auto;min-width:0;border:1px solid #e3e7f0;border-radius:10px;padding:10px 12px;font-size:16px;outline:none}
 .cfoot button{border:0;background:#2f6df6;color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600}
 .crhint{padding:10px 14px;font-size:12px;color:#8b90a0;text-align:center}
+
+.visit-back{position:fixed;left:10px;top:calc(8px + env(safe-area-inset-top));z-index:99999;width:38px;height:38px;border:0;border-radius:50%;
+background:rgba(255,255,255,.92);color:#2f6df6;font-size:22px;line-height:1;font-family:inherit;
+box-shadow:0 6px 18px rgba(30,60,120,.18);display:flex;align-items:center;justify-content:center;cursor:pointer}
 </style>
 </head>
 <body>
+<button class="visit-back" id="visitBack" aria-label="返回">‹</button>
+<script>
+(function(){
+  var b=document.getElementById('visitBack');
+  b.onclick=function(){
+    try{ if(window.history.length>1){history.back();return} }catch(e){}
+    try{ history.back(); }catch(e){}
+  };
+})();
+</script>
 <div class="wrap">
   <div class="hero" id="hero">
     <div class="heroCover" id="heroCover"></div>
