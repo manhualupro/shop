@@ -23,7 +23,7 @@
 <script>
 (function(){
   var b=document.getElementById('visitBack');
-  var inApp=!!(window.MHL&&typeof window.MHL.navVisible==='function');
+  var inApp=(!!(window.MHL&&typeof window.MHL.navVisible==='function'))||/;\s*wv\)|MHLPro|manhualupro\./.test(navigator.userAgent);
   if(!inApp||!b){ if(b)b.style.display='none'; return }
   b.onclick=function(){try{history.back()}catch(e){};try{window.MHL&&MHL.openUrl&&0}catch(e){}};
 })();
