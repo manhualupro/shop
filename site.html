@@ -21,7 +21,12 @@
 <div id="load"><img id="loadimg" alt="loading"><span id="tip">正在打开网站…</span></div>
 <iframe id="fr"></iframe>
 <script>
-document.getElementById('visitBack').onclick=function(){try{history.back()}catch(e){}};
+(function(){
+  var b=document.getElementById('visitBack');
+  var inApp=!!(window.MHL&&typeof window.MHL.navVisible==='function');
+  if(!inApp||!b){ if(b)b.style.display='none'; return }
+  b.onclick=function(){try{history.back()}catch(e){};try{window.MHL&&MHL.openUrl&&0}catch(e){}};
+})();
 </script>
 <script>
 (function(){

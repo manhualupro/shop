@@ -209,11 +209,10 @@ box-shadow:0 6px 18px rgba(30,60,120,.18);display:flex;align-items:center;justif
 <button class="visit-back" id="visitBack" aria-label="返回">‹</button>
 <script>
 (function(){
-  var b=document.getElementById('visitBack');
-  b.onclick=function(){
-    try{ if(window.history.length>1){history.back();return} }catch(e){}
-    try{ history.back(); }catch(e){}
-  };
+  var b=document.getElementById('visitBack'); if(!b)return;
+  var inApp=!!(window.MHL&&typeof window.MHL.navVisible==='function');
+  if(!inApp){ b.style.display='none'; return }
+  b.onclick=function(){try{history.back()}catch(e){}};
 })();
 </script>
 <div class="wrap">
