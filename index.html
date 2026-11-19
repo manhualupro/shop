@@ -359,7 +359,7 @@ function runCashier(no){
   if(cfg.ali)chans.push({k:'ali',n:'支付宝（码支付）',qr:cfg.ali});
   if(!chans.length){document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:system-ui">商家还没上传收款码</div>';return}
   var cur=(ch==='ali'&&cfg.ali)?'ali':(ch==='wx'&&cfg.wx?'wx':chans[0].k);
-  var t0=Date.now(), done=false;
+  var t0=Date.now(), done=false, claimed=false;
   document.body.innerHTML=
     '<div style="font-family:-apple-system,system-ui,sans-serif;min-height:100vh;background:linear-gradient(180deg,#fff5f8,#eef4ff)">'+
       '<div style="display:flex;align-items:center;gap:8px;padding:16px 16px 10px">'+
@@ -389,7 +389,18 @@ function runCashier(no){
       '<div id="csCd" style="font-size:13px;font-weight:700;color:#ff5f8f;margin-top:8px">剩余 '+mm+':'+(ss<10?'0':'')+ss+'</div>'+
       '<div style="font-size:12px;color:#6b7a92;margin-top:8px;line-height:1.7">点二维码会直接跳转 '+(cur==='wx'?'微信':'支付宝')+' 付款<br>备注可不填，付款后按订单号自动检测</div>'+
       '<a href="'+scheme+'" style="display:block;margin-top:14px;background:#2f6df6;color:#fff;border-radius:12px;padding:13px;font-size:15px;font-weight:700;text-decoration:none">打开 '+(cur==='wx'?'微信':'支付宝')+' 付款</a>'+
-      '<div style="font-size:12px;color:#3aa76d;margin-top:10px">付款完成会自动检测订单号，成功后立即发卡</div>';
+      '<div style="font-size:12px;color:#3aa76d;margin-top:10px">付款完成会自动检测订单号，成功后立即发卡</div>'+
+      '<button id="csClaim" style="margin-top:12px;width:100%;border:1px solid #cfd8ea;background:#fff;color:#2f6df6;font-size:14px;font-weight:700;padding:12px;border-radius:12px">'+
+        (claimed?'已通知店主核对，请稍候…':'我已付款（通知店主核对）')+'</button>';
+    var cl=document.getElementById('csClaim');
+    if(cl)cl.onclick=function(){
+      claimed=true;cl.textContent='已通知店主核对，请稍候…';
+      try{
+        fetch('https://fjarlttqnznykmvlsxma.supabase.co/rest/v1/orders',{method:'POST',
+          headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+          body:JSON.stringify([{no:no,shop:SID,data:{st:'claim',price:amt,name:nm,ch:cur,key:'',ts:Date.now()}}])}).catch(function(){});
+      }catch(e){}
+    };
     var cp=document.getElementById('csCopy');
     if(cp)cp.onclick=function(){
       try{
