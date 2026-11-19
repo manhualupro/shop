@@ -10,11 +10,19 @@
   #load img{width:126px;height:126px;object-fit:contain;animation:falls 1.5s ease-in-out infinite}
   @keyframes falls{0%{transform:translateY(-16px) rotate(-4deg);opacity:0}55%{opacity:1}100%{transform:translateY(18px) rotate(4deg);opacity:.85}}
   iframe{border:0;width:100%;height:100%;position:fixed;inset:0;display:none}
+
+  #visitBack{position:fixed;left:10px;top:calc(8px + env(safe-area-inset-top));z-index:2147483001;width:38px;height:38px;border:0;border-radius:50%;
+    background:rgba(255,255,255,.94);color:#2f6df6;font-size:22px;line-height:1;font-family:inherit;
+    box-shadow:0 6px 18px rgba(30,60,120,.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
 </style>
 </head>
 <body>
+<button id="visitBack" aria-label="返回">‹</button>
 <div id="load"><img id="loadimg" alt="loading"><span id="tip">正在打开网站…</span></div>
 <iframe id="fr"></iframe>
+<script>
+document.getElementById('visitBack').onclick=function(){try{history.back()}catch(e){}};
+</script>
 <script>
 (function(){
   var SB='https://fjarlttqnznykmvlsxma.supabase.co/storage/v1/object/public/sites/';
