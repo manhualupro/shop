@@ -454,7 +454,7 @@ function runCashier(no){
   },1000);
   poll();setInterval(poll,3000);
 }
-pullShop(function(){ if(qp('cashier')) runCashier(qp('cashier')); else startShop(); });
+pullShop(startShop);
 
 
 /* ===== 蓝色风格2 ===== */
