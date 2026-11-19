@@ -49,6 +49,7 @@
   function grab(p){return fetch(base+p+'?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()})}
 
   readCfg(function(){
+    try{ if(cfg.name){ document.title=cfg.name } }catch(e){}
     if(cfg.load){ document.getElementById('loadimg').src = cfg.loadimg || (HOST+'loadgirl.png'); }
     else { document.getElementById('loadimg').style.display='none'; }
 
@@ -88,11 +89,26 @@
     /* 1. 液态玻璃 UI */
     if(cfg.glass && !doc.getElementById('__glass')){
       var st=doc.createElement('style'); st.id='__glass';
-      st.textContent='body{background-attachment:fixed}'
-        +'div,section,article,li,button,a.header,.card,.box{backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}'
-        +'div[style*="background"],.card,.box{border:1px solid rgba(255,255,255,.55)!important;border-radius:16px!important;'
-        +'box-shadow:0 10px 30px rgba(31,58,120,.14),inset 0 1px 0 rgba(255,255,255,.7)!important}';
+      st.textContent='div,section,article,li,button,a,header,footer,aside,nav{'
+        +'-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);'
+        +'border-radius:14px;border:1px solid rgba(255,255,255,.42);'
+        +'box-shadow:0 10px 26px rgba(31,58,120,.12),inset 0 1px 0 rgba(255,255,255,.55)}';
       doc.head.appendChild(st);
+      /* 白色/不透明底色一律换成液态玻璃（透明+模糊） */
+      try{
+        var all=doc.body.querySelectorAll('div,section,article,li,header,footer,aside,nav,ul,dl,form,p,span,table,td,tr');
+        for(var i=0;i<all.length;i++){
+          var el=all[i];
+          if(/^(IMG|VIDEO|IFRAME|CANVAS|SVG|SVGIMG)$/i.test(el.tagName))continue;
+          var bc='';
+          try{ bc=getComputedStyle(el).backgroundColor||'' }catch(e){ bc='' }
+          var m=/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(bc);
+          if(!m)continue;
+          var a=m[4]===undefined?1:parseFloat(m[4]);
+          if(a<=0.25)continue;                       /* 本来就透明就跳过 */
+          el.style.backgroundColor='rgba(255,255,255,.16)';
+        }
+      }catch(e){}
     }
 
     /* 2. 背景图 */
