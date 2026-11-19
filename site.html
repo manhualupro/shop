@@ -62,6 +62,7 @@
       var fr=document.getElementById('fr');
       fr.onload=function(){
         applyPlugins(fr);
+        [400,1200,2500].forEach(function(ms){ setTimeout(function(){ try{applyPlugins(fr)}catch(e){} }, ms) });
         setTimeout(function(){loadBox.style.display='none';fr.style.display='block'}, cfg.load?900:250);
       };
       fr.srcdoc=txt;
@@ -85,7 +86,7 @@
     if(!doc||!doc.documentElement)return;
 
     /* 1. 液态玻璃 UI */
-    if(cfg.glass){
+    if(cfg.glass && !doc.getElementById('__glass')){
       var st=doc.createElement('style'); st.id='__glass';
       st.textContent='body{background-attachment:fixed}'
         +'div,section,article,li,button,a.header,.card,.box{backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}'
@@ -95,7 +96,7 @@
     }
 
     /* 2. 背景图 */
-    if(cfg.bg){
+    if(cfg.bg && !doc.getElementById('__bg')){
       var st2=doc.createElement('style'); st2.id='__bg';
       st2.textContent='html{background:transparent!important}'
         +'body{background-image:url("'+(cfg.bgimg||(HOST+'bg.jpg'))+'")!important;'
