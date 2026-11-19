@@ -349,7 +349,86 @@ function startShop(){
   boot();
   mountChat();
 }
-pullShop(startShop);
+/* ===== 收银台模式（外部网址）===== */
+function qp(k){var m=location.search.match(new RegExp('[?&]'+k+'=([^&]+)'));return m?decodeURIComponent(m[1]):''}
+function runCashier(no){
+  var nm=qp('nm')||'商品', amt=parseFloat(qp('amt')||'0'), ch=qp('ch')||'';
+  var cfg=(S.payCfg||{});
+  var chans=[];
+  if(cfg.wx)chans.push({k:'wx',n:'微信（码支付）',qr:cfg.wx});
+  if(cfg.ali)chans.push({k:'ali',n:'支付宝（码支付）',qr:cfg.ali});
+  if(!chans.length){document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:system-ui">商家还没上传收款码</div>';return}
+  var cur=(ch==='ali'&&cfg.ali)?'ali':(ch==='wx'&&cfg.wx?'wx':chans[0].k);
+  var t0=Date.now(), done=false;
+  document.body.innerHTML=
+    '<div style="font-family:-apple-system,system-ui,sans-serif;min-height:100vh;background:linear-gradient(180deg,#fff5f8,#eef4ff)">'+
+      '<div style="display:flex;align-items:center;gap:8px;padding:16px 16px 10px">'+
+        '<span style="font-size:19px;font-weight:800;color:#1f2a44">收银台 - 漫花鹿Pro</span>'+
+        '<span style="margin-left:auto;font-size:12px;color:#3aa76d">● 安全支付</span></div>'+
+      '<div style="margin:6px 14px;background:#fff;border-radius:18px;box-shadow:0 6px 22px rgba(40,70,130,.1);padding:18px 16px;text-align:center" id="csBox"></div>'+
+    '</div>';
+  function draw(){
+    var c=chans.filter(function(x){return x.k===cur})[0]||chans[0];
+    var left=t0+10*60*1000-Date.now();
+    var mm=Math.max(0,Math.floor(left/60000)), ss=Math.max(0,Math.floor((left%60000)/1000));
+    var scheme=(cur==='wx')?'weixin://':'alipays://platformapi/startapp?saId=10000007';
+    document.getElementById('csBox').innerHTML=
+      '<div style="font-size:13px;color:#8b97ab">'+esc(nm)+'</div>'+
+      '<div style="font-size:30px;font-weight:800;color:#ff5f8f;margin:6px 0 2px">¥'+yuan(amt)+'</div>'+
+      '<div style="font-size:12px;color:#8b97ab;font-family:monospace">订单号 '+esc(no)+'</div>'+
+      (chans.length>1?('<div style="display:flex;gap:8px;justify-content:center;margin:12px 0 4px">'+chans.map(function(x){
+          return '<button data-k="'+x.k+'" style="border:0;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;'+
+            'background:'+(x.k===cur?'#2f6df6':'#eef3ff')+';color:'+(x.k===cur?'#fff':'#2f6df6')+'">'+x.n+'</button>';
+        }).join('')+'</div>'):'<div style="font-size:12px;color:#6b7a92;margin-top:10px">'+c.n+'</div>')+
+      '<a href="'+scheme+'" style="display:inline-block;margin-top:8px">'+
+        '<img src="'+c.qr+'" style="width:210px;height:210px;object-fit:contain;background:#fff;border-radius:14px;display:block">'+
+      '</a>'+
+      '<div id="csCd" style="font-size:13px;font-weight:700;color:#ff5f8f;margin-top:8px">剩余 '+mm+':'+(ss<10?'0':'')+ss+'</div>'+
+      '<div style="font-size:12px;color:#6b7a92;margin-top:8px;line-height:1.7">点二维码或长按识别即可打开 '+(cur==='wx'?'微信':'支付宝')+' 付款<br>付款备注可不填，到账按金额自动核对</div>'+
+      '<a href="'+scheme+'" style="display:block;margin-top:14px;background:#2f6df6;color:#fff;border-radius:12px;padding:13px;font-size:15px;font-weight:700;text-decoration:none">打开 '+(cur==='wx'?'微信':'支付宝')+' 付款</a>';
+    Array.prototype.forEach.call(document.querySelectorAll('#csBox button'),function(b){
+      b.onclick=function(){cur=b.getAttribute('data-k');draw()};
+    });
+  }
+  function poll(){
+    if(done)return;
+    fetch('https://fjarlttqnznykmvlsxma.supabase.co/rest/v1/orders?no=eq.'+encodeURIComponent(no)+'&select=data',
+      {headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}})
+      .then(function(r){return r.json()})
+      .then(function(rows){
+        var d=(rows&&rows[0]&&rows[0].data)||{};
+        if(d.st==='done'){done=true;showDone(d.key||'')}
+      }).catch(function(){});
+  }
+  function showDone(key){
+    var back=5;
+    document.body.innerHTML=
+      '<div style="font-family:-apple-system,system-ui,sans-serif;min-height:100vh;background:linear-gradient(180deg,#f2fff7,#eef4ff);display:flex;align-items:center;justify-content:center;padding:24px">'+
+        '<div style="background:#fff;border-radius:18px;box-shadow:0 8px 26px rgba(40,70,130,.12);padding:24px 18px;text-align:center;max-width:420px">'+
+          '<div style="font-size:40px;line-height:1">✓</div>'+
+          '<div style="font-size:17px;font-weight:800;color:#1f2a44;margin-top:8px">支付成功，正在返回网站</div>'+
+          '<div style="font-size:12px;color:#8b97ab;margin-top:6px">订单号 '+esc(no)+' · ¥'+yuan(amt)+'</div>'+
+          (key?('<div style="margin-top:14px;text-align:left"><div style="font-size:12px;color:#8b97ab">你的卡密</div>'+
+            '<div style="font-family:monospace;font-size:15px;word-break:break-all;background:#f7f9ff;padding:12px;border-radius:12px;margin-top:6px">'+esc(key)+'</div></div>'):'')+
+          '<div id="csBack" style="font-size:12px;color:#6b7a92;margin-top:14px">'+back+' 秒后自动返回…</div>'+
+        '</div></div>';
+    var t=setInterval(function(){
+      back--;var el=document.getElementById('csBack');
+      if(el)el.textContent=back+' 秒后自动返回…';
+      if(back<=0){clearInterval(t);location.href='https://manhualupro.github.io/shop/index.html?s='+encodeURIComponent(SID)}
+    },1000);
+  }
+  draw();
+  setInterval(function(){
+    var el=document.getElementById('csCd'); if(!el||done)return;
+    var left=t0+10*60*1000-Date.now();
+    if(left<=0){el.textContent='已超时，请重新下单';return}
+    var mm=Math.floor(left/60000),ss=Math.floor((left%60000)/1000);
+    el.textContent='剩余 '+mm+':'+(ss<10?'0':'')+ss;
+  },1000);
+  poll();setInterval(poll,3000);
+}
+pullShop(function(){ if(qp('cashier')) runCashier(qp('cashier')); else startShop(); });
 
 
 /* ===== 蓝色风格2 ===== */
