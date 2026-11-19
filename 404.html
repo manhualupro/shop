@@ -347,7 +347,6 @@ function startShop(){
     return;
      }
   boot();
-  mountChat();
 }
 pullShop(startShop);
 
@@ -620,10 +619,8 @@ function buyerPay(p,chan){
         '<div style="font-size:13px;color:#8b97ab">订单号</div>'+
         '<div style="font-family:monospace;font-size:15px;font-weight:700;margin-top:4px">'+no+'</div>'+
         '<div style="font-size:13px;color:#8b97ab;margin-top:10px">'+esc(p.name)+' · '+(Number(p.price)>0?('¥'+yuan(p.price)):'免费')+'</div></div>'+
-        '<div style="font-size:13px;color:#6b7a92;line-height:1.8;margin-bottom:12px">把订单号发给商家，商家核对到账后就把卡密发你。没收到可以点下面联系商家。</div>'+
-        '<button class="btn" id="bkContact">联系商家</button>'+
-        '<button class="btn ghost" style="margin-top:10px" id="bkDone">关闭</button>';
-      $('bkContact').onclick=function(){showContact()};
+        '<div style="font-size:13px;color:#6b7a92;line-height:1.8;margin-bottom:12px">把订单号发给商家，商家核对到账后就把卡密发你。</div>'+
+        '<button class="btn ghost" id="bkDone">关闭</button>';
       $('bkDone').onclick=function(){$('mask').classList.remove('on')};
     };
     $('bkClose').onclick=function(){stop();$('mask').classList.remove('on')};
