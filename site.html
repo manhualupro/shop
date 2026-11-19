@@ -22,10 +22,11 @@
   var tip=document.getElementById('tip');
   if(!site){tip.textContent='缺少站点标识（链接里的 s 参数）';return}
   var base=SB+encodeURIComponent(site)+'/';
-  fetch(base+page).then(function(r){
-    if(!r.ok)throw new Error('404');
-    return r.text();
-  }).then(function(txt){
+  function grab(p){return fetch(base+p+'?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()})}
+  grab(page).catch(function(){
+    if(page==='index.html')return grab('index.htm');
+    throw 0;
+  }).catch(function(){return grab('index.html')}).then(function(txt){
     // 注入 base，保证图片、音乐、css 的相对路径都能取到
     var inject='<base href="'+base+'">';
     if(/<head[^>]*>/i.test(txt)){txt=txt.replace(/<head([^>]*)>/i,function(m,a){return '<head'+a+'>'+inject})}
@@ -35,7 +36,7 @@
     fr.srcdoc=txt;
     setTimeout(function(){document.getElementById('load').style.display='none';fr.style.display='block'},1200);
   }).catch(function(){
-    tip.innerHTML='网站不存在或还没创建完成。<br>回 App 里重新创建，或把链接里的后缀改成正确的。';
+    tip.innerHTML='没找到这个网站：<b>'+site.replace(/[<>&]/g,'')+'</b><br>① 进 App 点「个人网站」确认后缀是这一个；<br>② 如果刚重新上传，等 1 分钟再刷新；<br>③ 还是不行就在 App 里点「重新部署」重新上传一次。';
   });
 })();
 </script>
