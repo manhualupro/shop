@@ -363,7 +363,7 @@ function runCashier(no){
   document.body.innerHTML=
     '<div style="font-family:-apple-system,system-ui,sans-serif;min-height:100vh;background:linear-gradient(180deg,#fff5f8,#eef4ff)">'+
       '<div style="display:flex;align-items:center;gap:8px;padding:16px 16px 10px">'+
-        '<span style="font-size:19px;font-weight:800;color:#1f2a44">收银台 - 漫花鹿Pro</span>'+
+        '<span style="font-size:19px;font-weight:800;color:#1f2a44">漫花鹿Pro 支付码</span>'+
         '<span style="margin-left:auto;font-size:12px;color:#3aa76d">● 安全支付</span></div>'+
       '<div style="margin:6px 14px;background:#fff;border-radius:18px;box-shadow:0 6px 22px rgba(40,70,130,.1);padding:18px 16px;text-align:center" id="csBox"></div>'+
     '</div>';
@@ -373,9 +373,12 @@ function runCashier(no){
     var mm=Math.max(0,Math.floor(left/60000)), ss=Math.max(0,Math.floor((left%60000)/1000));
     var scheme=(cur==='wx')?'weixin://':'alipays://platformapi/startapp?saId=10000007';
     document.getElementById('csBox').innerHTML=
-      '<div style="font-size:13px;color:#8b97ab">'+esc(nm)+'</div>'+
+      '<div style="font-size:13px;color:#8b97ab">漫花鹿Pro 支付码</div>'+
       '<div style="font-size:30px;font-weight:800;color:#ff5f8f;margin:6px 0 2px">¥'+yuan(amt)+'</div>'+
-      '<div style="font-size:12px;color:#8b97ab;font-family:monospace">订单号 '+esc(no)+'</div>'+
+      '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px">'+
+        '<span style="font-size:12px;color:#8b97ab;font-family:monospace">订单号 '+esc(no)+'</span>'+
+        '<button id="csCopy" style="border:0;background:#eef3ff;color:#2f6df6;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px">复制</button>'+
+      '</div>'+
       (chans.length>1?('<div style="display:flex;gap:8px;justify-content:center;margin:12px 0 4px">'+chans.map(function(x){
           return '<button data-k="'+x.k+'" style="border:0;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;'+
             'background:'+(x.k===cur?'#2f6df6':'#eef3ff')+';color:'+(x.k===cur?'#fff':'#2f6df6')+'">'+x.n+'</button>';
@@ -384,9 +387,21 @@ function runCashier(no){
         '<img src="'+c.qr+'" style="width:210px;height:210px;object-fit:contain;background:#fff;border-radius:14px;display:block">'+
       '</a>'+
       '<div id="csCd" style="font-size:13px;font-weight:700;color:#ff5f8f;margin-top:8px">剩余 '+mm+':'+(ss<10?'0':'')+ss+'</div>'+
-      '<div style="font-size:12px;color:#6b7a92;margin-top:8px;line-height:1.7">点二维码或长按识别即可打开 '+(cur==='wx'?'微信':'支付宝')+' 付款<br>付款备注可不填，到账按金额自动核对</div>'+
-      '<a href="'+scheme+'" style="display:block;margin-top:14px;background:#2f6df6;color:#fff;border-radius:12px;padding:13px;font-size:15px;font-weight:700;text-decoration:none">打开 '+(cur==='wx'?'微信':'支付宝')+' 付款</a>';
+      '<div style="font-size:12px;color:#6b7a92;margin-top:8px;line-height:1.7">点二维码会直接跳转 '+(cur==='wx'?'微信':'支付宝')+' 付款<br>备注可不填，付款后按订单号自动检测</div>'+
+      '<a href="'+scheme+'" style="display:block;margin-top:14px;background:#2f6df6;color:#fff;border-radius:12px;padding:13px;font-size:15px;font-weight:700;text-decoration:none">打开 '+(cur==='wx'?'微信':'支付宝')+' 付款</a>'+
+      '<div style="font-size:12px;color:#3aa76d;margin-top:10px">付款完成会自动检测订单号，成功后立即发卡</div>';
+    var cp=document.getElementById('csCopy');
+    if(cp)cp.onclick=function(){
+      try{
+        if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(no).then(function(){cp.textContent='已复制'});
+      }catch(e){}
+      try{
+        var ta=document.createElement('textarea');ta.value=no;document.body.appendChild(ta);
+        ta.select();document.execCommand('copy');document.body.removeChild(ta);cp.textContent='已复制';
+      }catch(x){}
+    };
     Array.prototype.forEach.call(document.querySelectorAll('#csBox button'),function(b){
+      if(!b.getAttribute('data-k'))return;
       b.onclick=function(){cur=b.getAttribute('data-k');draw()};
     });
   }
