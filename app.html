@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>漫花鹿 Pro</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1b1f2a;
+ background:
+  radial-gradient(120% 80% at 12% 0%, #ffe6f3 0%, rgba(255,230,243,0) 60%),
+  radial-gradient(100% 70% at 92% 8%, #e6f0ff 0%, rgba(230,240,255,0) 62%),
+  radial-gradient(90% 60% at 50% 100%, #eef0ff 0%, rgba(238,240,255,0) 70%),
+  linear-gradient(180deg,#fdf7fb 0%,#f3f6fd 52%,#f7f7fb 100%);
+ min-height:100%;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.wrap{max-width:620px;margin:0 auto;padding:14px 14px 0}
+.glass{background:rgba(255,255,255,.62);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+ border:1px solid rgba(255,255,255,.75);border-radius:20px;box-shadow:0 10px 30px rgba(96,86,140,.10)}
+.hd{display:flex;align-items:center;gap:12px;padding:16px}
+.av{width:56px;height:56px;border-radius:18px;flex:0 0 auto;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);overflow:hidden}
+.hd .nm{font-size:17px;font-weight:700}
+.hd .sub{font-size:12px;color:#6d7385;margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(47,109,246,.12);color:#2f6df6}
+.sec{margin-top:14px}
+.tt{font-size:13px;color:#6d7385;margin:0 0 8px 4px;font-weight:600}
+.card{padding:14px 16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:14px}
+.stat i{font-style:normal;font-size:12px;color:#7b8194;display:block}
+.stat b{font-size:20px;display:block;margin-top:6px;letter-spacing:.3px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;font-size:14px}
+.row+.row{border-top:1px solid rgba(140,145,170,.14)}
+.row b{font-weight:600;color:#3a3f51}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:600}
+.btn.primary{background:linear-gradient(135deg,#3d7dfb,#7a5cf0);color:#fff;box-shadow:0 10px 24px rgba(76,100,220,.28)}
+.btn.ghost{background:rgba(255,255,255,.7);color:#3a3f51;border:1px solid rgba(255,255,255,.9)}
+.btn:active{transform:scale(.98)}
+.note{font-size:12px;color:#7b8194;line-height:1.7;padding:12px 16px}
+/* 频道 */
+.chan{display:flex;align-items:center;gap:12px;padding:13px 16px;margin-bottom:10px}
+.chan .ic{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+ background:linear-gradient(135deg,rgba(122,92,240,.18),rgba(61,125,251,.22));color:#4b53a8}
+.chan .tx{flex:1 1 auto;min-width:0}
+.chan .tx b{font-size:14px;display:block}
+.chan .tx i{font-style:normal;font-size:12px;color:#7b8194;display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chan .act{flex:0 0 auto}
+.chatroom{display:none;position:fixed;inset:0;z-index:900;flex-direction:column;background:rgba(250,250,255,.9);backdrop-filter:blur(14px)}
+.chatroom.on{display:flex}
+.chatroom .top{padding:14px 16px calc(10px);display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(140,145,170,.15);background:rgba(255,255,255,.7);backdrop-filter:blur(20px)}
+.chatroom .top .bk{border:0;background:rgba(240,242,250,.9);border-radius:12px;width:34px;height:34px;font-size:16px;color:#5b6178}
+.chatroom .top b{font-size:15px}
+.chatroom .top span{font-size:12px;color:#7b8194;display:block;margin-top:2px}
+.msgs{flex:1 1 auto;overflow-y:auto;padding:14px}
+.m{display:flex;gap:8px;margin-bottom:12px;align-items:flex-start}
+.m .alp{width:32px;height:32px;border-radius:10px;flex:0 0 auto;background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,1);overflow:hidden}
+.m .bd{min-width:0}
+.m .bd .nm{font-size:11px;color:#8a90a3;margin-bottom:3px}
+.m .bd .bb{display:inline-block;background:#fff;padding:9px 12px;border-radius:12px;font-size:14px;line-height:1.5;max-width:260px;word-break:break-word;box-shadow:0 3px 12px rgba(96,86,140,.08)}
+.m.me{flex-direction:row-reverse}
+.m.me .bd{text-align:right}
+.m.me .bd .bb{background:linear-gradient(135deg,#4a7df7,#7d5ef3);color:#fff;text-align:left}
+.memberrow{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;padding:14px 16px}
+.memberrow .mu{display:flex;flex-direction:column;align-items:center;gap:4px}
+.memberrow .mu .a{width:100%;aspect-ratio:1/1;border-radius:10px;background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,1);overflow:hidden}
+.memberrow .mu .n{font-size:9px;color:#8a90a3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inputbar{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border-top:1px solid rgba(140,145,170,.15)}
+.inputbar input{flex:1 1 auto;min-width:0;border:1px solid rgba(140,145,170,.2);background:#fff;border-radius:14px;padding:11px 14px;font-size:16px;outline:none}
+/* 底部玻璃导航 */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:min(92%,430px);height:64px;
+ display:flex;align-items:center;justify-content:space-around;z-index:950;border-radius:26px;
+ background:rgba(255,255,255,.55);backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);
+ border:1px solid rgba(255,255,255,.85);box-shadow:0 14px 40px rgba(88,78,130,.18),inset 0 1px 0 rgba(255,255,255,.9)}
+.nav button{position:relative;flex:1 1 0;height:100%;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:#7b8194;border-radius:22px;transition:.18s}
+.nav button svg{width:23px;height:23px}
+.nav button.on{color:#2f5fd0;font-weight:700}
+.nav button.on::before{content:"";position:absolute;inset:6px 10px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(235,240,255,.85));box-shadow:0 6px 16px rgba(90,100,180,.16);z-index:-1}
+.nav .dot{position:absolute;top:8px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:#ff5277;box-shadow:0 0 0 3px rgba(255,82,119,.18);display:none}
+.nav .dot.on{display:block}
+/* 面板 */
+.sheet{position:fixed;inset:0;z-index:980;display:none;background:rgba(24,26,40,.34)}
+.sheet.on{display:block}
+.sheet .p{position:absolute;left:0;right:0;bottom:0;border-radius:22px 22px 0 0;background:rgba(255,255,255,.92);backdrop-filter:blur(22px);padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:80%;overflow-y:auto}
+.sheet .p h3{font-size:15px;margin:0 0 12px}
+.sheet .p .li{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid rgba(140,145,170,.14);font-size:14px}
+.sheet .p .li:last-child{border-bottom:0}
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:rgba(30,32,45,.88);color:#fff;font-size:13px;padding:10px 16px;border-radius:12px;z-index:1200;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.field{display:flex;gap:8px;margin:8px 0}
+.field input{flex:1;border:1px solid rgba(140,145,170,.24);border-radius:12px;padding:11px 13px;font-size:16px;outline:none;background:#fff;min-width:0}
+.fabtop{position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.75);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;z-index:20}
+.fabtop svg{width:18px;height:18px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="glass" style="position:relative">
+    <button class="fabtop" id="manage" title="频道管理">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="#5b6178"/><circle cx="12" cy="12" r="1.6" fill="#5b6178"/><circle cx="12" cy="19" r="1.6" fill="#5b6178"/></svg>
+    </button>
+    <div class="hd">
+      <div class="av" id="hdAv"></div>
+      <div style="min-width:0">
+        <div class="nm" id="hdName">漫花鹿 Pro</div>
+        <div class="sub"><span class="badge">店铺主页</span><span id="hdTime">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主页 -->
+  <div id="tab-home">
+    <div class="sec">
+      <div class="grid2">
+        <div class="glass stat"><i>商品</i><b id="stGoods">0</b></div>
+        <div class="glass stat"><i>卡密库存</i><b id="stKeys">0</b></div>
+        <div class="glass stat"><i>订单</i><b id="stOrders">0</b></div>
+        <div class="glass stat"><i>成交额</i><b id="stMoney">¥0</b></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="tt">我的店铺</div>
+      <div class="glass">
+        <div class="row"><span>店铺名</span><b id="iName">—</b></div>
+        <div class="row"><span>开店时间</span><b id="iTime">—</b></div>
+        <div class="row"><span>公网地址</span><b id="iLink" style="font-size:12px;max-width:60%;text-align:right;word-break:break-all">—</b></div>
+        <div class="row"><span>聊天频道</span><b id="iChan">0 个</b></div>
+        <div class="row"><span>版本</span><b>1.1.18.18</b></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="tt">快捷入口</div>
+      <div class="glass">
+        <div class="row"><span>打开公网店铺页</span><button class="btn ghost" id="goShop" style="padding:8px 14px">打开</button></div>
+        <div class="row"><span>进入聊天频道</span><button class="btn ghost" id="goChat" style="padding:8px 14px">进入</button></div>
+        <div class="row"><span>听歌</span><button class="btn ghost" id="goMusic" style="padding:8px 14px">去听</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聊天频道 -->
+  <div id="tab-chat" class="hidden">
+    <div class="sec">
+      <div class="tt">聊天频道（默认频道已加入）</div>
+      <div id="chanList"></div>
+      <div class="glass" style="padding:12px 16px">
+        <div class="note" style="padding:0">你是主负责人，可以新建 / 删除频道、移除成员。访客点“加入”进入频道。</div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="tt">成员（当前频道）</div>
+      <div class="glass"><div class="memberrow" id="members"></div></div>
+    </div>
+  </div>
+
+  <!-- 听歌 -->
+  <div id="tab-music" class="hidden">
+    <div class="sec">
+      <div class="glass" style="padding:14px">
+        <div class="field"><input id="mq" placeholder="搜索歌曲 / 歌手"><button class="btn primary" id="ms" style="padding:11px 16px">搜索</button></div>
+        <div class="tt" style="margin:12px 0 0">推荐</div>
+        <div id="mlist"></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="glass card">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="av" id="nowAv" style="width:46px;height:46px;border-radius:14px"></div>
+          <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600" id="nowName">未在播放</div><div style="font-size:12px;color:#7b8194;margin-top:3px" id="nowSub">选择一首歌开始</div></div>
+          <button class="btn ghost" id="playBtn" style="padding:10px 14px">播放</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 频道聊天室 -->
+<div class="chatroom" id="room">
+  <div class="top">
+    <button class="bk" id="roomBack">&#10094;</button>
+    <div style="flex:1;min-width:0"><b id="roomName">频道</b><span id="roomSub">0 人</span></div>
+    <button class="btn ghost" id="roomInvite" style="padding:8px 12px">加入</button>
+  </div>
+  <div class="msgs" id="roomMsgs"></div>
+  <div class="inputbar"><input id="roomIn" placeholder="说点什么…" maxlength="500"><button class="btn primary" id="roomSend" style="padding:11px 16px">发送</button></div>
+</div>
+
+<!-- 管理面板 -->
+<div class="sheet" id="sheet">
+  <div class="p" id="sheetP"></div>
+</div>
+
+<div class="nav">
+  <button class="on" data-tab="home"><svg viewBox="0 0 24 24" fill="none"><path d="M4 10.6 12 4l8 6.6V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>主页</button>
+  <button data-tab="chat"><span class="dot" id="navDot"></span><svg viewBox="0 0 24 24" fill="none"><path d="M21 11.6a8.4 8.4 0 0 1-8.4 8.4 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.7A8.4 8.4 0 1 1 21 11.6z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>聊天频道</button>
+  <button data-tab="music"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="6.5" cy="18" r="2.5" stroke="currentColor" stroke-width="1.7"/><circle cx="16.5" cy="16" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>听歌</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SB='https://fjarlttqnznykmvlsxma.supabase.co/rest/v1';
+var KEY='sb_publishable_2SUA34qjRy_yB_AgMYW81A_2KTzfL94';
+var PUB='https://manhualupro.github.io/shop/';
+var slug='',shop={},chans=[],curChan='',msgT=null,uint=null;
+var UID=(function(){var k='mhl_u';var v=localStorage.getItem(k);if(!v){v='u'+Date.now().toString(36)+Math.floor(Math.random()*900+100);localStorage.setItem(k,v)}return v})();
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function H(x){var h={apikey:KEY,Authorization:'Bearer '+KEY};for(var k in (x||{}))h[k]=x[k];return h}
+function toast(t){var el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('on')},2200)}
+function fmt(t){var d=new Date(t||Date.now());return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+
+/* 液态玻璃花瓣头像（SVG，纯矢量） */
+function petalAvatar(size,seed){
+  var s=size||56, id='g'+Math.random().toString(36).slice(2,7);
+  return '<svg width="100%" height="100%" viewBox="0 0 100 100"><defs>'+
+   '<radialGradient id="'+id+'a" cx="35%" cy="25%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="55%" stop-color="#ffd6e8"/><stop offset="100%" stop-color="#f6a8cd"/></radialGradient>'+
+   '<radialGradient id="'+id+'b" cx="30%" cy="20%" r="80%"><stop offset="0" stop-color="#ffffff"/><stop offset="60%" stop-color="#e2d4ff"/><stop offset="100%" stop-color="#b9a3f2"/></radialGradient>'+
+   '<radialGradient id="'+id+'c" cx="70%" cy="80%" r="70%"><stop offset="0" stop-color="#fff7fb"/><stop offset="100%" stop-color="#f0b6d8"/></radialGradient>'+
+   '<filter id="'+id+'f"><feGaussianBlur stdDeviation="1.1"/></filter></defs>'+
+   '<rect width="100" height="100" fill="#fdf5fa"/>'+
+   '<g filter="url(#'+id+'f)" opacity=".92">'+
+   '<ellipse cx="50" cy="34" rx="17" ry="26" fill="url(#'+id+'a)"/>'+
+   '<ellipse cx="50" cy="34" rx="13" ry="23" fill="rgba(255,255,255,.55)"/>'+
+   '<ellipse cx="36" cy="52" rx="21" ry="15" fill="url(#'+id+'b)" transform="rotate(-28 36 52)"/>'+
+   '<ellipse cx="64" cy="52" rx="21" ry="15" fill="url(#'+id+'b)" transform="rotate(28 64 52)"/>'+
+   '<ellipse cx="50" cy="72" rx="20" ry="14" fill="url(#'+id+'c)"/>'+
+   '</g><circle cx="50" cy="50" r="7.5" fill="rgba(255,255,255,.85)"/>'+
+   '<circle cx="50" cy="50" r="4" fill="#f19bc7"/></svg>';
+}
+function fillAv(el,name){el.innerHTML=petalAvatar(0)}
+function monogram(name){return (name||'漫').slice(0,1)}
+
+/* 数据 */
+function loadShop(){
+  fetch(SB+'/shop?select=data&k=eq.'+encodeURIComponent(slug),{headers:H()})
+   .then(function(r){return r.json()})
+   .then(function(rows){
+     if(!rows||!rows.length){
+       $('hdName').textContent='店铺不存在';
+       $('hdTime').textContent='后缀：'+esc(slug);
+       return;
+     }
+     shop=rows[0].data||{};
+     $('hdName').textContent=shop.name||'我的店铺';
+     $('hdTime').textContent='开店 '+(shop.created||'—');
+     $('iName').textContent=shop.name||'—';
+     $('iTime').textContent=shop.created||'—';
+     $('iLink').textContent=PUB+slug;
+     var prods=shop.prods||[],keys=0;prods.forEach(function(p){keys+=(p.keys||[]).length});
+     $('stGoods').textContent=prods.length;$('stKeys').textContent=keys;
+     $('hdAv').innerHTML=petalAvatar(56);
+   }).catch(function(){});
+  fetch(SB+'/orders?select=data&shop=eq.'+encodeURIComponent(slug),{headers:H()})
+   .then(function(r){return r.json()}).then(function(rows){
+     var sum=0;rows.forEach(function(o){sum+=Number((o.data&&o.data.price)||0)});
+     $('stOrders').textContent=rows.length;$('stMoney').textContent='¥'+sum;
+   }).catch(function(){});
+}
+function loadChans(){
+  fetch(SB+'/chan?select=id,name,ts&shop=eq.'+encodeURIComponent(slug)+'&order=ts.asc',{headers:H()})
+   .then(function(r){return r.json()})
+   .then(function(rows){
+     if(!rows.length){
+       return fetch(SB+'/chan',{method:'POST',headers:H({'Content-Type':'application/json','Prefer':'return=representation'}),
+         body:JSON.stringify([{shop:slug,name:'漫花鹿官方频道'}])})
+        .then(function(){loadChans()});
+     }
+     chans=rows;
+     $('iChan').textContent=chans.length+' 个';
+     renderChans();
+     if(curChan)loadMembers();
+   }).catch(function(){});
+}
+function renderChans(){
+  $('chanList').innerHTML=chans.map(function(c){
+    return '<div class="glass chan" data-id="'+c.id+'">'+
+     '<div class="ic">'+'<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 6h16M4 12h10M4 18h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'+'</div>'+
+     '<div class="tx"><b>'+esc(c.name)+'</b><i>点击进入 · 与访客实时同步</i></div>'+
+     '<div class="act"><span class="badge">已加入</span></div></div>';
+  }).join('');
+  [].forEach.call(document.querySelectorAll('.chan'),function(el){
+    el.onclick=function(){openRoom(chans.filter(function(c){return String(c.id)===el.getAttribute('data-id')})[0])};
+  });
+}
+function loadMembers(){
+  if(!curChan)return;
+  fetch(SB+'/chan_mem?select=uid,name&shop=eq.'+encodeURIComponent(slug)+'&chan=eq.'+encodeURIComponent(curChan)+'&order=ts.asc&limit=100',{headers:H()})
+   .then(function(r){return r.json()})
+   .then(function(rows){
+     var list=[{uid:'owner',name:'主负责人'}].concat(rows.filter(function(x){return x.uid!=='owner'}));
+     $('members').innerHTML=list.map(function(m){
+       return '<div class="mu" data-uid="'+esc(m.uid)+'"><div class="a">'+petalAvatar(0)+'</div><div class="n">'+esc(m.name)+'</div></div>';
+     }).join('');
+     [].forEach.call(document.querySelectorAll('.mu'),function(el){
+       el.onclick=function(){memberSheet(el.getAttribute('data-uid'))};
+     });
+   }).catch(function(){});
+}
+function joinChan(){
+  if(!curChan)return;
+  fetch(SB+'/chan_mem',{method:'POST',headers:H({'Content-Type':'application/json'}),
+    body:JSON.stringify([{shop:slug,chan:String(curChan),uid:UID,name:'访客'+UID.slice(-3)}])})
+   .then(function(){toast('已加入频道');loadMembers()}).catch(function(){});
+}
+
+/* 聊天室 */
+function openRoom(c){
+  if(!c)return;
+  curChan=String(c.id);
+  $('roomName').textContent=c.name;
+  $('room').classList.add('on');
+  joinChan();loadMsgs();
+  clearInterval(uint);uint=setInterval(loadMsgs,5000);
+  navDotOn(true);
+}
+function closeRoom(){
+  $('room').classList.remove('on');
+  clearInterval(uint);
+}
+function loadMsgs(){
+  fetch(SB+'/chat?select=who,txt,ts&shop=eq.'+encodeURIComponent(slug)+'&thread=eq.c'+encodeURIComponent(curChan)+'&order=ts.asc&limit=200',{headers:H()})
+   .then(function(r){return r.json()})
+   .then(function(rows){
+     $('roomSub').textContent=(rows.length?rows.length+' 条消息 · ':'')+document.querySelectorAll('.mu').length+' 人';
+     $('roomMsgs').innerHTML=rows.length?rows.map(function(m){
+       var me=m.who==='s';
+       return '<div class="m'+(me?' me':'')+'"><div class="alp">'+petalAvatar(0)+'</div>'+
+         '<div class="bd"><div class="nm">'+(me?'主负责人':'访客')+' · '+fmt(m.ts)+'</div>'+
+         '<div class="bb">'+esc(m.txt).replace(/\n/g,'<br>')+'</div></div></div>';
+     }).join(''):'<div class="note">还没有消息，说句话破冰吧</div>';
+     $('roomMsgs').scrollTop=$('roomMsgs').scrollHeight;
+   }).catch(function(){});
+}
+function sendMsg(){
+  var v=$('roomIn').value.trim();if(!v||!curChan)return;
+  $('roomIn').value='';
+  fetch(SB+'/chat',{method:'POST',headers:H({'Content-Type':'application/json','Prefer':'return=representation'}),
+    body:JSON.stringify([{shop:slug,thread:'c'+curChan,who:'s',txt:v}])})
+   .then(function(){loadMsgs()}).catch(function(){toast('发送失败，检查网络')});
+}
+function navDotOn(on){$('navDot').classList.toggle('on',!!on)}
+
+/* 管理 */
+function manageSheet(){
+  $('sheetP').innerHTML='<h3>频道管理</h3>'+
+    '<div class="li"><span>新建频道</span><b style="color:#2f5fd0">＋</b></div>'+
+    '<div class="li"><span>删除当前频道</span><b style="color:#e5484d">删除</b></div>'+
+    '<div class="li"><span>移除成员</span><span style="color:#7b8194;font-size:12px">点头像操作</span></div>';
+  var lis=$('sheetP').querySelectorAll('.li');
+  lis[0].onclick=function(){sheetNewChan()};
+  lis[1].onclick=function(){delChan()};
+  lis[2].onclick=function(){closeSheet();toast('点成员头像即可移除')};
+  $('sheet').classList.add('on');
+}
+function sheetNewChan(){
+  $('sheetP').innerHTML='<h3>新建频道</h3><div class="field"><input id="ncName" placeholder="频道名称"><button class="btn primary" id="ncGo" style="padding:11px 16px">创建</button></div><div class="note" style="padding:6px 2px 0">创建后前台访客即可加入。</div>';
+  $('ncGo').onclick=function(){
+    var n=$('ncName').value.trim();if(!n)return toast('写个名字');
+    fetch(SB+'/chan',{method:'POST',headers:H({'Content-Type':'application/json','Prefer':'return=representation'}),body:JSON.stringify([{shop:slug,name:n}])})
+     .then(function(){closeSheet();toast('已创建');loadChans()}).catch(function(){toast('创建失败')});
+  };
+  $('sheet').classList.add('on');
+}
+function memberSheet(uid){
+  $('sheetP').innerHTML='<h3>成员</h3><div class="li"><span>'+esc(uid==='owner'?'主负责人':'访客 '+uid.slice(-4))+'</span><b>'+(uid==='owner'?'管理员':'普通成员')+'</b></div>'+
+   (uid==='owner'?'':'<div class="li" style="color:#e5484d"><span>移出该成员</span><b>移除</b></div>');
+  var del=$('sheetP').querySelectorAll('.li')[uid==='owner'?0:1];
+  if(uid!=='owner')del.onclick=function(){
+    fetch(SB+'/chan_mem?shop=eq.'+encodeURIComponent(slug)+'&chan=eq.'+encodeURIComponent(curChan)+'&uid=eq.'+encodeURIComponent(uid),{method:'DELETE',headers:H()})
+     .then(function(){closeSheet();toast('已移除');loadMembers()}).catch(function(){});
+  };
+  $('sheet').classList.add('on');
+}
+function delChan(){
+  if(!curChan)return toast('先进入一个频道');
+  fetch(SB+'/chan?id=eq.'+encodeURIComponent(curChan)+'&shop=eq.'+encodeURIComponent(slug),{method:'DELETE',headers:H()})
+   .then(function(){fetch(SB+'/chat?shop=eq.'+encodeURIComponent(slug)+'&thread=eq.c'+encodeURIComponent(curChan),{method:'DELETE',headers:H()})})
+   .then(function(){fetch(SB+'/chan_mem?shop=eq.'+encodeURIComponent(slug)+'&chan=eq.'+encodeURIComponent(curChan),{method:'DELETE',headers:H()})})
+   .then(function(){closeSheet();curChan='';closeRoom();toast('频道已删除');loadChans()})
+   .catch(function(){toast('删除失败')});
+}
+function closeSheet(){$('sheet').classList.remove('on')}
+
+/* 听歌 */
+var TRACKS=[{n:'DREAM FUNF',a:'漫花鹿歌单'},{n:'Watcher',a:'漫花鹿歌单'},{n:'夜航星',a:'漫花鹿歌单'},{n:'Lemon',a:'漫花鹿歌单'},{n:'晴天',a:'漫花鹿歌单'}];
+function renderMusic(q){
+  var list=TRACKS.filter(function(t){return !q||t.n.toLowerCase().indexOf(q.toLowerCase())>=0||t.a.indexOf(q)>=0});
+  $('mlist').innerHTML=(list.length?list:[{n:'没有找到，换个词试试',a:'—'}]).map(function(t,i){
+    return '<div class="glass row" data-i="'+i+'" style="border-radius:14px;margin-top:8px"><span>'+esc(t.n)+'<span style="color:#8a90a3;font-size:12px"> · '+esc(t.a)+'</span></span><b style="color:#2f5fd0;font-size:13px">播放</b></div>';
+  }).join('');
+  [].forEach.call(document.querySelectorAll('#mlist .row'),function(el){
+    el.onclick=function(){var t=list[+el.getAttribute('data-i')];if(t&&t.a!=='—')playTrack(t)};
+  });
+}
+function playTrack(t){
+  $('nowName').textContent=t.n;$('nowSub').textContent=t.a;
+  $('nowAv').innerHTML=petalAvatar(46);
+  toast('曲库还没接进来，先记着这首「'+t.n+'」');
+}
+renderMusic('');
+
+/* 导航 */
+[].forEach.call(document.querySelectorAll('.nav button'),function(b){
+  b.onclick=function(){
+    [].forEach.call(document.querySelectorAll('.nav button'),function(x){x.classList.remove('on')});
+    b.classList.add('on');
+    var t=b.getAttribute('data-tab');
+    ['home','chat','music'].forEach(function(k){$('tab-'+k).classList.toggle('hidden',k!==t)});
+    if(t==='chat'){navDotOn(false);loadChans();loadMembers()}
+  };
+});
+$('goShop').onclick=function(){open(PUB+slug,'_blank')};
+$('goChat').onclick=function(){[].forEach.call(document.querySelectorAll('.nav button'),function(x){if(x.getAttribute('data-tab')==='chat')x.click()})};
+$('goMusic').onclick=function(){[].forEach.call(document.querySelectorAll('.nav button'),function(x){if(x.getAttribute('data-tab')==='music')x.click()})};
+$('manage').onclick=manageSheet;
+$('sheet').onclick=function(e){if(e.target===$('sheet'))closeSheet()};
+$('roomBack').onclick=closeRoom;
+$('roomSend').onclick=sendMsg;
+$('roomIn').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg()});
+$('roomInvite').onclick=function(){toast('这个频道你已经加入了')};
+$('ms').onclick=function(){renderMusic($('mq').value.trim())};
+$('mq').addEventListener('keydown',function(e){if(e.key==='Enter')renderMusic($('mq').value.trim())});
+$('playBtn').onclick=function(){toast('曲库还没接进来')};
+
+/* 启动 */
+(function start(){
+  var s=new URLSearchParams(location.search).get('s');
+  if(!s){
+    var p=location.pathname.split('/').filter(function(x){return x}).filter(function(x){return ['shop','app.html','app'].indexOf(x)<0});
+    if(p.length)s=decodeURIComponent(p[p.length-1]);
+  }
+  if(!s){$('hdName').textContent='请带上店铺后缀';$('hdTime').textContent='例：/shop/app.html?s=niulai';return}
+  slug=s.toLowerCase();
+  $('hdAv').innerHTML=petalAvatar(56);
+  loadShop();
+  loadChans();
+})();
+</script>
+</body>
+</html>
