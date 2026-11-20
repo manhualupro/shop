@@ -104,7 +104,7 @@
           if(!m)continue;
           var a=m[4]===undefined?1:parseFloat(m[4]);
           if(a<=0.25)continue;
-          el.style.backgroundColor='rgba(255,255,255,.16)';
+          el.style.backgroundColor='rgba(255,255,255,.06)';
           var w=0,h=0;
           try{ var rc=el.getBoundingClientRect(); w=rc.width; h=rc.height }catch(e){}
           if(w>=200 && h>=56){
@@ -136,7 +136,7 @@
             +'background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;'
             +'background-attachment:fixed!important;')
           +'body{min-height:100vh}'
-          +'body>.wrap,body>#app,.page,.container{background:rgba(255,255,255,.02)!important}';
+          +'html,body,body>.wrap,body>#app,body>.page,.page,.container,main{background-color:transparent!important}';
         doc.head.appendChild(st2);
       }
     }
