@@ -51,7 +51,7 @@
   readCfg(function(){
     try{ if(cfg.name){ document.title=cfg.name } }catch(e){}
     if(cfg.load){ document.getElementById('loadimg').src = cfg.loadimg || (HOST+'loadgirl.png'); }
-    else { document.getElementById('loadimg').style.display='none'; }
+    else { document.getElementById('load').style.display='none'; }   /* 关掉插件就不显示加载动画 */
 
     grab(page).catch(function(){
       if(page==='index.html')return grab('index.htm');
@@ -117,14 +117,28 @@
     }
 
     /* 2. 背景图 */
-    if(cfg.bg && !doc.getElementById('__bg')){
-      var st2=doc.createElement('style'); st2.id='__bg';
-      st2.textContent='html{background:transparent!important}'
-        +'body{background-image:url("'+(cfg.bgimg||(HOST+'bg.jpg'))+'")!important;'
-        +'background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;'
-        +'background-attachment:fixed!important;min-height:100vh}'
-        +'body>.wrap,body>#app,.page,.container{background:rgba(255,255,255,.02)!important}';
-      doc.head.appendChild(st2);
+    if(cfg.bg){
+      var bgUrl = cfg.bgimg || (HOST+'bg.jpg');
+      var isVid = /\.(mp4|webm)(\?|$)/i.test(bgUrl);
+      if(isVid){
+        if(!doc.getElementById('__bgvid')){
+          var v=doc.createElement('video'); v.id='__bgvid';
+          v.src=bgUrl; v.autoplay=true; v.loop=true; v.muted=true; v.setAttribute('playsinline','');
+          v.style.cssText='position:fixed;left:0;top:0;width:100vw;height:100vh;object-fit:cover;z-index:-2;pointer-events:none;background:#000';
+          doc.body.insertBefore(v, doc.body.firstChild);
+        }
+      }
+      if(!doc.getElementById('__bg')){
+        var st2=doc.createElement('style'); st2.id='__bg';
+        st2.textContent='html{background:transparent!important}'
+          +(isVid? 'body{background:transparent!important}' :
+            'body{background-image:url("'+bgUrl+'")!important;'
+            +'background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;'
+            +'background-attachment:fixed!important;')
+          +'body{min-height:100vh}'
+          +'body>.wrap,body>#app,.page,.container{background:rgba(255,255,255,.02)!important}';
+        doc.head.appendChild(st2);
+      }
     }
 
     /* 3. 中英文切换 */
