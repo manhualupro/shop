@@ -89,24 +89,29 @@
     /* 1. 液态玻璃 UI */
     if(cfg.glass && !doc.getElementById('__glass')){
       var st=doc.createElement('style'); st.id='__glass';
-      st.textContent='div,section,article,li,button,a,header,footer,aside,nav{'
-        +'-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);'
-        +'border-radius:14px;border:1px solid rgba(255,255,255,.42);'
-        +'box-shadow:0 10px 26px rgba(31,58,120,.12),inset 0 1px 0 rgba(255,255,255,.55)}';
+      st.textContent='div,section,article,header,footer,aside,nav{'
+        +'-webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%)}';
       doc.head.appendChild(st);
       /* 白色/不透明底色一律换成液态玻璃（透明+模糊） */
       try{
-        var all=doc.body.querySelectorAll('div,section,article,li,header,footer,aside,nav,ul,dl,form,p,span,table,td,tr');
+        var all=doc.body.querySelectorAll('div,section,article,header,footer,aside,nav,ul,dl,form,table');
         for(var i=0;i<all.length;i++){
           var el=all[i];
-          if(/^(IMG|VIDEO|IFRAME|CANVAS|SVG|SVGIMG)$/i.test(el.tagName))continue;
+          if(/^(IMG|VIDEO|IFRAME|CANVAS|SVG)$/i.test(el.tagName))continue;
           var bc='';
           try{ bc=getComputedStyle(el).backgroundColor||'' }catch(e){ bc='' }
           var m=/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(bc);
           if(!m)continue;
           var a=m[4]===undefined?1:parseFloat(m[4]);
-          if(a<=0.25)continue;                       /* 本来就透明就跳过 */
+          if(a<=0.25)continue;
           el.style.backgroundColor='rgba(255,255,255,.16)';
+          var w=0,h=0;
+          try{ var rc=el.getBoundingClientRect(); w=rc.width; h=rc.height }catch(e){}
+          if(w>=200 && h>=56){
+            el.style.borderRadius='14px';
+            el.style.border='1px solid rgba(255,255,255,.45)';
+            el.style.boxShadow='0 10px 26px rgba(31,58,120,.12), inset 0 1px 0 rgba(255,255,255,.55)';
+          }
         }
       }catch(e){}
     }
