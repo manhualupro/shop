@@ -636,15 +636,21 @@ function buyerPay(p,chan){
 }
 function buySheet(p){
   if(buyerPay(p))return;
-  var pay=S.pay||{wechat:true,alipay:true};
-  var picks=[];if(pay.wechat!==false)picks.push('wechat');if(pay.alipay!==false)picks.push('alipay');
-  if(!picks.length)picks=['wechat'];
-  var cur=picks[0];
+  var pay=S.pay||{};
+  var picks=[];if(pay.wechat===true)picks.push('wechat');if(pay.alipay===true)picks.push('alipay');
+  var cur=picks.length?picks[0]:'';
   function draw(){
     var h='<div class="t">'+esc(p.name)+'</div><div class="p">'+(Number(p.price)>0?('¥'+yuan(p.price)):'免费')+'</div>';
-    h+='<div style="font-size:13px;color:#6b7a92;margin-bottom:8px">选择支付方式</div><div class="pay">';
-    h+='<button class="paybtn'+(cur==='wechat'?' on':(picks.indexOf('wechat')<0?' off':''))+'" data-m="wechat"><img class="pico" src="'+WX_ICON+'" alt="">微信支付</button>';
-    h+='<button class="paybtn'+(cur==='alipay'?' on':(picks.indexOf('alipay')<0?' off':''))+'" data-m="alipay"><img class="pico" src="'+ALI_ICON+'" alt="">支付宝</button></div>';
+    if(picks.length){
+      h+='<div style="font-size:13px;color:#6b7a92;margin-bottom:8px">选择支付方式</div><div class="pay">';
+      if(picks.indexOf('wechat')>=0)h+='<button class="paybtn'+(cur==='wechat'?' on':'')+'" data-m="wechat"><img class="pico" src="'+WX_ICON+'" alt="">微信支付</button>';
+      if(picks.indexOf('alipay')>=0)h+='<button class="paybtn'+(cur==='alipay'?' on':'')+'" data-m="alipay"><img class="pico" src="'+ALI_ICON+'" alt="">支付宝</button>';
+      h+='</div>';
+    }else{
+      h+='<div style="font-size:13px;color:#8b97ab;margin:4px 0 12px">商家暂未开通在线支付，请联系商家</div>';
+    }
+    h+='<div style="font-size:13px;color:#6b7a92;margin:0 0 8px">联系方式（6位数字）</div>';
+    h+='<input id="buyContact" inputmode="numeric" maxlength="6" placeholder="请输入6位联系方式" style="width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #dfe6f2;background:#fff;padding:12px 14px;font-size:14px;margin-bottom:14px">';
     h+='<button class="btn'+(S.style==='blue'?' ':' pink')+'" id="payNow">立即支付</button>';
     $('sheet').innerHTML=h;
     $('sheet').querySelectorAll('.paybtn').forEach(function(b){
@@ -654,7 +660,18 @@ function buySheet(p){
         cur=m;draw();
       };
     });
-    $('payNow').onclick=function(){done(p,cur)};
+    var ci=document.getElementById('buyContact');
+    if(ci){
+      ci.addEventListener('input',function(){ci.value=(ci.value||'').replace(/\D/g,'').slice(0,6)});
+      try{ci.value=S.contactVal||''}catch(e){}
+    }
+    $('payNow').onclick=function(){
+      var v=ci?(ci.value||'').replace(/\D/g,''):'';
+      if(!/^\d{6}$/.test(v)){toast('请输入联系方式');try{ci.focus()}catch(e){};return}
+      S.contactVal=v;
+      if(!cur){toast('商家暂未开通在线支付，请联系商家');return}
+      done(p,cur);
+    };
   }
   function done(prod,method){
     var left=usedLeft(prod);
@@ -662,7 +679,7 @@ function buySheet(p){
     var key=takeKey(prod)||'暂无卡密';
     var no='MH'+Date.now().toString().slice(-8)+Math.floor(Math.random()*90+10);
     $('sheet').innerHTML='<div class="t">支付成功</div>'+
-      '<div style="font-size:12px;color:#8b97ab;margin:6px 0 12px">订单号 '+no+' · '+(method==='wechat'?'微信支付':'支付宝')+'</div>'+
+      '<div style="font-size:12px;color:#8b97ab;margin:6px 0 12px">订单号 '+no+' · '+(method==='wechat'?'微信支付':'支付宝')+(S.contactVal?(' · '+esc(S.contactVal)):'')+'</div>'+
       '<div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:12px;color:#8b97ab">商品</div>'+
       '<div style="font-size:14px;font-weight:700;margin-top:4px">'+esc(prod.name)+'</div></div>'+
       '<div style="font-size:13px;color:#6b7a92;margin-bottom:6px">你的卡密</div>'+
