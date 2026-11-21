@@ -86,7 +86,7 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .sheet .t{font-size:16px;font-weight:800;margin-bottom:4px}
 .sheet .p{font-size:22px;font-weight:800;color:#ff6a3d;margin:8px 0 14px}
 .pay{display:flex;gap:10px;margin-bottom:14px}
-.paybtn{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:18px;border:1px solid #dfe6f2;background:#fff;font-size:14px;font-weight:700;color:#4a4a4a;cursor:pointer}
+.paybtn{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid #dfe6f2;background:#fff;font-size:14px;font-weight:700;color:#4a4a4a;cursor:pointer}
 .pico{width:26px;height:26px;border-radius:50%;display:block}
 .paybtn.on{border-color:#3f8cff;background:#eff5ff;color:#2f6df6}
 .paybtn.off{opacity:.4;text-decoration:line-through}
@@ -219,13 +219,13 @@ body.b2body{background:#f4f6fa}
     </div>
     <div class="notice" id="notice"></div>
     <div class="links" id="links"></div>
-    <div class="crow" id="crow"></div>
   </div>
   <div class="main">
     <div class="sec">卡密</div>
     <div class="chips" id="chips"></div>
     <div class="sec2">选择商品</div>
     <div id="goods"></div>
+    <div class="crow" id="crow" style="margin-top:16px"></div>
     <div class="end">没有更多了</div>
     <div class="power">Powered by 漫花鹿Pro</div>
   </div>
@@ -282,6 +282,7 @@ var curCat=null;
 
 /* ===== 客服聊天（云端同步） ===== */
 var CHAT_API=SB_URL.replace('/shop','/chat');
+var searchQ='';
 var VID=(function(){var k='mhl_vid';var v=localStorage.getItem(k);if(!v){v='v'+Date.now().toString(36)+Math.floor(Math.random()*900+100);localStorage.setItem(k,v)}return v})();
 function chatEl(){return document.getElementById('cmask')}
 function openChat(){
@@ -520,8 +521,11 @@ function renderChips(){
   renderGoods();
 }
 function renderGoods(){
-  var list=(S.prods||[]).filter(function(p){return p.catId===curCat});
-  if(!list.length){$('goods').innerHTML='<div class="empty">这个分类还没有商品</div>';return}
+  var list=(S.prods||[]).filter(function(p){
+    if(searchQ)return (p.name||'').toLowerCase().indexOf(searchQ.toLowerCase())>=0;
+    return p.catId===curCat;
+  });
+  if(!list.length){$('goods').innerHTML='<div class="empty">'+(searchQ?'没有找到相关商品':'这个分类还没有商品')+'</div>';return}
   var h='<div class="grid">';
   list.forEach(function(p){
     var left=(p.keys||[]).length;
@@ -643,8 +647,10 @@ function buySheet(p){
     var h='<div class="t">'+esc(p.name)+'</div><div class="p">'+(Number(p.price)>0?('¥'+yuan(p.price)):'免费')+'</div>';
     if(picks.length){
       h+='<div style="font-size:13px;color:#6b7a92;margin-bottom:8px">选择支付方式</div><div class="pay">';
-      if(picks.indexOf('wechat')>=0)h+='<button class="paybtn'+(cur==='wechat'?' on':'')+'" data-m="wechat"><img class="pico" src="'+WX_ICON+'" alt="">微信支付</button>';
-      if(picks.indexOf('alipay')>=0)h+='<button class="paybtn'+(cur==='alipay'?' on':'')+'" data-m="alipay"><img class="pico" src="'+ALI_ICON+'" alt="">支付宝</button>';
+      ['wechat','alipay'].forEach(function(m){
+        if(picks.indexOf(m)<0){ h+='<span class="paybtn" style="visibility:hidden"></span>'; return }
+        h+='<button class="paybtn'+(cur===m?' on':'')+'" data-m="'+m+'"><img class="pico" src="'+(m==='wechat'?WX_ICON:ALI_ICON)+'" alt="">'+(m==='wechat'?'微信支付':'支付宝')+'</button>';
+      });
       h+='</div>';
     }else{
       h+='<div style="font-size:13px;color:#8b97ab;margin:4px 0 12px">商家暂未开通在线支付，请联系商家</div>';
@@ -692,7 +698,16 @@ function buySheet(p){
   $('mask').classList.add('on');draw();
 }
 if($('lookupBtn'))$('lookupBtn').onclick=function(){toast('请凭订单号联系商家查询，或在 App 内查看订单')};
-if($('searchBtn'))$('searchBtn').onclick=function(){toast('在 App 里的店铺页可以搜索')};
+if($('searchBtn'))$('searchBtn').onclick=function(){
+  if(searchQ){ searchQ=''; renderChips(); toast('已回到全部商品'); return }
+  $('sheet').innerHTML='<div class="t">搜索商品</div>'+
+    '<input id="qIn" placeholder="输入商品名称" style="width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #dfe6f2;background:#fff;padding:12px 14px;font-size:14px;margin:10px 0 14px">'+
+    '<button class="btn pink" id="qGo">搜索</button>'+
+    '<button class="btn ghost" id="qBack" style="margin-top:10px">返回全部商品</button>';
+  $('mask').classList.add('on');
+  $('qGo').onclick=function(){ searchQ=((document.getElementById('qIn').value)||'').trim(); $('mask').classList.remove('on'); renderChips(); };
+  $('qBack').onclick=function(){ searchQ=''; $('mask').classList.remove('on'); renderChips(); };
+};
 $('mask').onclick=function(e){if(e.target===$('mask'))$('mask').classList.remove('on')};
 function setupMusic(){
   var m=S.music;if(!m||(!m.url&&!m.id))return;
