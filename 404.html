@@ -220,6 +220,13 @@ body.b2body{background:#f4f6fa}
 .cfoot input{flex:1 1 auto;min-width:0;border:1px solid #e3e7f0;border-radius:10px;padding:10px 12px;font-size:16px;outline:none}
 .cfoot button{border:0;background:#2f6df6;color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600}
 .crhint{padding:10px 14px;font-size:12px;color:#8b90a0;text-align:center}
+
+.paybtn{background:#fff!important;color:#222!important;border:1px solid #e2e6ee!important;border-radius:0!important}
+.paybtn.on{background:#fff!important;color:#111!important;border:1.5px solid #222!important}
+.paybtn *{color:#222!important}
+.paybtn img{filter:none}
+.sheet .btn{background:#fff!important;color:#111!important;border:1.5px solid #222!important;border-radius:0!important}
+.sheet{background:#fff!important;border-radius:0!important}
 </style>
 </head>
 <body>
@@ -670,10 +677,10 @@ function buySheet(p){
     var h='<div class="t">'+esc(p.name)+'</div><div class="p">'+(Number(p.price)>0?('¥'+yuan(p.price)):'免费')+'</div>';
     if(picks.length){
       h+='<div style="font-size:13px;color:#6b7a92;margin-bottom:8px">选择支付方式</div><div class="pay">';
-      ['wechat','alipay'].forEach(function(m){
-        if(picks.indexOf(m)<0){ h+='<span class="paybtn" style="visibility:hidden"></span>'; return }
+      picks.forEach(function(m){
         h+='<button class="paybtn'+(cur===m?' on':'')+'" data-m="'+m+'"><img class="pico" src="'+(m==='wechat'?WX_ICON:ALI_ICON)+'" alt="">'+(m==='wechat'?'微信支付':'支付宝')+'</button>';
       });
+      for(var pi=picks.length;pi<2;pi++){ h+='<span class="paybtn" style="visibility:hidden"></span>' }
       h+='</div>';
     }else{
       h+='<div style="font-size:13px;color:#8b97ab;margin:4px 0 12px">商家暂未开通在线支付，请联系商家</div>';
