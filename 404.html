@@ -79,6 +79,27 @@ body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;backgr
 .power{text-align:center;color:#c2c8d4;font-size:11px;padding:8px 0 18px}
 .sec b.rem{font-weight:800}
 .empty{padding:20px;text-align:center;color:#9aa7bd;font-size:13px}
+/* 直角 + 黑字 + 满宽 */
+.chip{border-radius:0!important;background:#f2f4f8;color:#222!important}
+.chip.on{background:#e8f1ff;color:#222!important}
+.links a{border-radius:0!important;color:#222!important;background:#fff!important;border:1px solid #e6e6e6!important}
+.card{border-radius:0!important}
+.cbtn{border-radius:0!important;color:#222!important}
+.cbtn svg{stroke:#222!important}
+.paybtn{border-radius:0!important;color:#222!important}
+.paybtn.on{color:#222!important}
+.sheet{background:#fff!important;border-radius:0!important}
+.sheet .btn{border-radius:0!important}
+.sheet .btn.ghost{border-radius:0!important}
+#buyContact{border-radius:0!important;color:#222!important}
+.hero.custom .heroCover{margin-left:-16px!important;margin-right:-16px!important;width:calc(100% + 32px)!important}
+.cnt{display:flex;justify-content:flex-end;gap:18px;text-align:center}
+.cnt .cn b{display:block;font-size:18px!important;font-weight:700!important;line-height:1.15;text-align:center!important}
+.cnt .cn span{display:block;font-size:12px!important;font-weight:600!important;margin-top:2px;text-align:center!important}
+.hero.custom .cnt{position:absolute;right:16px;top:18px}
+.hero.custom .crow{position:absolute!important;right:0!important;top:78px!important;margin:0!important}
+.hero.custom .crow .cbtn{height:30px;padding:0 12px;font-size:12px}
+
 .mask{position:fixed;inset:0;background:rgba(20,30,50,.45);display:none;align-items:flex-end;justify-content:center;z-index:50}
 .mask.on{display:flex}
 .sheet{width:100%;max-width:560px;background:#f7f8fb;border-radius:20px 20px 0 0;padding:18px 18px 26px;animation:up .25s ease}
@@ -216,6 +237,7 @@ body.b2body{background:#f4f6fa}
         <div id="tagWrap"></div>
         <div class="cnt" id="cnt"></div>
       </div>
+      <div class="crow" id="crow"></div>
     </div>
     <div class="notice" id="notice"></div>
     <div class="links" id="links"></div>
@@ -225,7 +247,6 @@ body.b2body{background:#f4f6fa}
     <div class="chips" id="chips"></div>
     <div class="sec2">选择商品</div>
     <div id="goods"></div>
-    <div class="crow" id="crow" style="margin-top:16px"></div>
     <div class="end">没有更多了</div>
     <div class="power">Powered by 漫花鹿Pro</div>
   </div>
@@ -485,7 +506,8 @@ function boot(){
   $('ava').innerHTML=S.avatar?('<img src="'+esc(S.avatar)+'" alt="">'):esc(S.name.slice(0,1));
   $('nm').textContent=S.name;
   if(false){$('tagWrap').innerHTML='<span class="tag">卖货商家</span>'}
-  $('cnt').innerHTML='<b>'+(S.prods||[]).length+'</b><span>商品</span>';
+  $('cnt').innerHTML='<div class="cn"><b>'+(Number(S.sales)||0)+'</b><span>成交</span></div>'+
+    '<div class="cn"><b>'+(S.prods||[]).length+'</b><span>商品</span></div>';
   var rem=(S.prods||[]).reduce(function(a,p){return a+(p.keys||[]).length},0);
   var rl=document.querySelector('.sec .rem');if(rl)rl.textContent=rem;
   if(S.notice)$('notice').textContent=S.notice;
@@ -498,12 +520,12 @@ function boot(){
     $('crow').innerHTML='<button class="cbtn" id="cBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#3f8cff" stroke-width="1.8"><rect x="3" y="5" width="18" height="12" rx="3"/><path d="M8 20l4-3"/></svg>联系 TA</button>';
     $('cBtn').onclick=contactSheet;
   }
-  if((S.cats||[]).length)curCat=S.cats[0].id;
+  if(curCat!=='__all'&&!(S.cats||[]).some(function(c){return c.id===curCat}))curCat=(S.cats&&S.cats[0])?S.cats[0].id:'__all';
   renderChips();
   setupMusic();
 }
 function renderChips(){
-  var h='';
+  var h='<button class="chip'+(curCat==='__all'?' on':'')+'" data-c="__all"><span class="cx"><b>全部</b></span></button>';
   (S.cats||[]).forEach(function(c){
     var n=(S.prods||[]).filter(function(p){return p.catId===c.id}).length;
     var on=c.id===curCat;
@@ -523,6 +545,7 @@ function renderChips(){
 function renderGoods(){
   var list=(S.prods||[]).filter(function(p){
     if(searchQ)return (p.name||'').toLowerCase().indexOf(searchQ.toLowerCase())>=0;
+    if(curCat==='__all')return true;
     return p.catId===curCat;
   });
   if(!list.length){$('goods').innerHTML='<div class="empty">'+(searchQ?'没有找到相关商品':'这个分类还没有商品')+'</div>';return}
@@ -656,7 +679,7 @@ function buySheet(p){
       h+='<div style="font-size:13px;color:#8b97ab;margin:4px 0 12px">商家暂未开通在线支付，请联系商家</div>';
     }
     h+='<div style="font-size:13px;color:#6b7a92;margin:0 0 8px">联系方式（6位数字）</div>';
-    h+='<input id="buyContact" inputmode="numeric" maxlength="6" placeholder="请输入6位联系方式" style="width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #dfe6f2;background:#fff;padding:12px 14px;font-size:14px;margin-bottom:14px">';
+    h+='<input id="buyContact" inputmode="numeric" maxlength="6" placeholder="请输入6位联系方式" style="width:100%;box-sizing:border-box;border-radius:0;border:1px solid #dfe6f2;background:#fff;color:#222;padding:12px 14px;font-size:14px;margin-bottom:14px">';
     h+='<button class="btn'+(S.style==='blue'?' ':' pink')+'" id="payNow">立即支付</button>';
     $('sheet').innerHTML=h;
     $('sheet').querySelectorAll('.paybtn').forEach(function(b){
