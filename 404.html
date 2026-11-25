@@ -321,7 +321,7 @@ function copyText(t){
   try{document.execCommand('copy');toast('已复制')}catch(x){toast('复制失败，请长按选择')}
   document.body.removeChild(ta);
 }
-var BADGES=[];for(var _i=1;_i<=8;_i++){BADGES.push({n:_i+'.png',src:'cert'+_i+'.png?v=3'});}
+var BADGES=[1,2,3,4,5,7].map(function(i){return {n:i+'.png',src:'cert'+i+'.png?v=4'};});
 var curCat=null;
 
 
@@ -763,8 +763,12 @@ function buySheet(p){
       done(p,cur);
     };
   }
-  function pushShop(){
-    try{fetch(SB_URL+'/rest/v1/shop',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({k:SID,data:S})})}catch(e){}
+  function pushShop(n){
+    n=n||0;
+    try{fetch(SB_URL+'/rest/v1/shop',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({k:SID,data:S})})
+      .then(function(r){ if(!r.ok&&n<3)setTimeout(function(){pushShop(n+1)},1500); })
+      .catch(function(){ if(n<3)setTimeout(function(){pushShop(n+1)},1500); });
+    }catch(e){}
     _wc(S);
   }
   function done(prod,method){
