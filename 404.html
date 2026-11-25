@@ -540,8 +540,9 @@ function boot(){
   var _cert=(S.cert&&typeof S.cert==='object')?S.cert:{'1.png':1,'2.png':1,'3.png':1,'4.png':1};
   $('certs').innerHTML=BADGES.filter(function(b){return _cert[b.n]}).map(function(b){return '<img src="'+b.src+'" alt="" onerror="this.style.display=\'none\'">'}).join('');
   if(false){$('tagWrap').innerHTML='<span class="tag">卖货商家</span>'}
+  var _ps=(S.plugins&&S.plugins.sales!==false);
   $('cnt').innerHTML='<div class="cn"><b>'+(S.prods||[]).length+'</b><span>商品</span></div>'+
-    '<div class="cn"><b>'+(Number(S.sales)||0)+'</b><span>成交</span></div>';
+    (_ps?'<div class="cn"><b>'+(Number(S.sales)||0)+'</b><span>成交</span></div>':'');
   var rem=(S.prods||[]).reduce(function(a,p){return a+(p.keys||[]).length},0);
   var rl=document.querySelector('.sec .rem');if(rl)rl.textContent=rem;
   if(S.notice){$('notice').style.display='';$('notice').textContent=S.notice}else{$('notice').style.display='none'}
@@ -559,7 +560,9 @@ function boot(){
   setupMusic();
 }
 function renderChips(){
-  var h='<button class="chip'+(curCat==='__all'?' on':'')+'" data-c="__all"><span class="cx"><b>全部</b></span></button>';
+  var _pa=(S.plugins&&S.plugins.all!==false);
+  if(!_pa&&curCat==='__all'&&(S.cats||[]).length)curCat=S.cats[0].id;
+  var h=_pa?('<button class="chip'+(curCat==='__all'?' on':'')+'" data-c="__all"><span class="cx"><b>全部</b></span></button>'):'';
   (S.cats||[]).forEach(function(c){
     var n=(S.prods||[]).filter(function(p){return p.catId===c.id}).length;
     var on=c.id===curCat;
