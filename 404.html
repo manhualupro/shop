@@ -442,9 +442,10 @@ function buildBlue2(){
       var left=(p.keys||[]).length;
       var price=Number(p.price)>0?('¥'+yuan(p.price)):'免费';
       var stock=left<=0?'缺货':(left>100?'库存充足':('剩余 '+left+' 张'));
+      var stockCls=left<=0?'out':(left<=10?'low':(left>=100?'ok':(left>=60?'mid':'low')));
       return '<div class="b2-good'+(st.prod&&st.prod.id===p.id?' on':'')+'" data-p="'+esc(p.id)+'">'+
         '<div class="gt"><div class="gn">'+esc(p.name)+'</div>'+
-        '<div class="gp">'+price+'</div><div class="gs">'+stock+'</div></div></div>';
+        '<div class="gp">'+price+'</div><div class="gs '+stockCls+'">'+stock+'</div></div></div>';
     }).join('')||'<div class="b2-note">这个分类还没有商品</div>';
 
     var ck='';
@@ -605,11 +606,12 @@ function renderGoods(){
     var left=(p.keys||[]).length;
     var cls=left<=0?'out':(left>=60?'ok':'low');
     var label=left<=0?'缺货':(left>100?'库存充足':(left>=60?'库存一般':'剩余 '+left+' 张'));
+    var lcls=left<=0?'out':(left<=10?'low':(left>=100?'ok':(left>=60?'mid':'low')));
     var price=Number(p.price)>0?('¥'+yuan(p.price)):'免费';
     h+='<div class="card" data-p="'+esc(p.id)+'">'+
        (p.thumb?('<div class="th"><img src="'+esc(p.thumb)+'" alt=""></div>'):'')+
        '<div class="cb"><div class="pn">'+esc(p.name)+'</div>'+
-       '<div class="prow"><span class="price">'+price+'</span><span class="stock '+cls+'">'+label+'</span></div></div></div>';
+       '<div class="prow"><span class="price">'+price+'</span><span class="stock '+lcls+'">'+label+'</span></div></div></div>';
   });
   h+='</div>';
   $('goods').innerHTML=h;
