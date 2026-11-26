@@ -553,8 +553,10 @@ function boot(){
   $('certs').innerHTML=BADGES.filter(function(b){return _cert[b.n]}).map(function(b){return '<img src="'+b.src+'" alt="" onerror="this.style.display=\'none\'">'}).join('');
   if(false){$('tagWrap').innerHTML='<span class="tag">卖货商家</span>'}
   var _ps=(S.plugins&&S.plugins.sales!==false);
+  var _pb=(S.plugins&&S.plugins.bond===true);
   $('cnt').innerHTML='<div class="cn"><b>'+(S.prods||[]).length+'</b><span>商品</span></div>'+
-    (_ps?'<div class="cn"><b>'+(Number(S.sales)||0)+'</b><span>成交</span></div>':'');
+    (_ps?'<div class="cn"><b>'+(Number(S.sales)||0)+'</b><span>成交</span></div>':'')+
+    (_pb?'<div class="cn"><b>'+yuan(Number(S.bond)||0)+'元</b><span>保证金</span></div>':'');
   var rem=(S.prods||[]).reduce(function(a,p){return a+(p.keys||[]).length},0);
   var rl=document.querySelector('.sec .rem');if(rl)rl.textContent=rem;
   if(S.notice){$('notice').style.display='';$('notice').textContent=S.notice}else{$('notice').style.display='none'}
@@ -778,11 +780,12 @@ function buySheet(p){
     try{
       if(prod.keys&&key!=='暂无卡密')prod.keys=prod.keys.filter(function(x){return x!==key});
       S.sales=(Number(S.sales)||0)+1;
+      S.bond=(Number(S.bond)||0)+(Number(prod.price)||0);
       if(prod.keys)prod.left=prod.keys.length;
       pushShop();
     }catch(e){}
     var _off=(cpOk&&cpAmt>0)?Math.min(cpAmt,Number(prod.price)||0):0;
-    if(_off>0){var _c=findCp(cpCode);if(_c){_c.u=(Number(_c.u)||0)+1;S.sales=(Number(S.sales)||0)+1;pushShop();}}
+    if(_off>0){var _c=findCp(cpCode);if(_c){_c.u=(Number(_c.u)||0)+1;pushShop();}}
     var no='MH'+Date.now().toString().slice(-8)+Math.floor(Math.random()*90+10);
     $('sheet').innerHTML='<div class="t">支付成功</div>'+
       '<div style="font-size:12px;color:#8b97ab;margin:6px 0 12px">订单号 '+no+' · '+(method==='wechat'?'微信支付':'支付宝')+(S.contactVal?(' · '+esc(S.contactVal)):'')+'</div>'+
@@ -790,7 +793,10 @@ function buySheet(p){
       '<div style="font-size:14px;font-weight:700;margin-top:4px">'+esc(prod.name)+'</div></div>'+
       '<div style="font-size:13px;color:#6b7a92;margin-bottom:6px">你的卡密</div>'+
       '<div class="keybox'+(S.style==='blue'?' wrap':'')+'" id="theKey">'+esc(key)+'</div>'+
-      '<button class="btn'+(S.style==='blue'?' ':' pink')+'" id="cpKey">复制卡密</button>'+
+      '<div style="font-size:13px;color:#6b7a92;margin:14px 0 6px">使用说明</div>'+
+      '<div style="background:#f7f8fa;border-radius:3px;padding:12px;font-size:13px;line-height:1.8;white-space:pre-wrap">'+esc(prod.note||'无')+'</div>'+
+      ((S.contact&&S.contact.qq)?('<div style="font-size:13px;color:#6b7a92;margin:14px 0 6px">商家联系方式</div><div style="background:#fff;border:1px solid #eceef3;border-radius:3px;padding:10px 12px;display:flex;justify-content:space-between"><b>QQ：'+esc(S.contact.qq)+'</b><a href="https://wpa.qq.com/msgrd?v=3&uin='+encodeURIComponent(S.contact.qq)+'&site=qq&menu=yes" target="_blank" style="color:#3f8cff;text-decoration:none">复制</a></div>'):'')+
+      '<button class="btn'+(S.style==='blue'?' ':' pink')+'" id="cpKey" style="margin-top:12px">复制卡密</button>'+
       '<button class="btn ghost" style="margin-top:10px" id="closeSheet">关闭</button>';
     $('cpKey').onclick=function(){copyText(key)};
     $('closeSheet').onclick=function(){$('mask').classList.remove('on')};
