@@ -710,7 +710,7 @@ function buyerPay(p,chan){
   },1000);
   return true;
 }
-var cpOn=false,cpCode='',cpAmt=0,cpOk=false;
+var cpOn=false,cpCode='',cpAmt=0,cpOk=false,cpBusy=false;
 function findCp(code){
   var arr=(S&&S.coupons)||[];code=(code||'').trim().toUpperCase();
   for(var i=0;i<arr.length;i++){var c=arr[i];if(c&&String(c.c||'').trim().toUpperCase()===code)return c}
@@ -723,11 +723,11 @@ function buySheet(p){
   var cur=picks.length?picks[0]:'';
   function draw(){
     var off=(cpOn&&cpOk)?Math.min(Number(cpAmt)||0,Number(p.price)||0):0;
-    var h='<div class="t">'+esc(p.name)+'</div><div class="p">'+(Number(p.price)>0?(off>0?('¥'+yuan(Number(p.price)-off)):'¥'+yuan(p.price)):'免费')+'</div>';
+    var h='<div class="t">'+esc(p.name)+'</div><div class="p">'+(Number(p.price)>0?(off>0?('<span style="color:#ff5f8f;font-weight:800">¥'+yuan(Number(p.price)-off)+'</span><span style="margin-left:10px;color:#9aa4b2;font-size:13px;text-decoration:line-through">¥'+yuan(p.price)+'</span><span style="margin-left:8px;color:#ff5f8f;font-size:12px;border:1px solid #ffd3e2;border-radius:999px;padding:1px 8px">已减 '+yuan(off)+' 元</span>'):('¥'+yuan(p.price))):'免费')+'</div>';
     h+='<div class="cprow" id="cpRow"><span class="cpbox'+(cpOn?' on':'')+'"></span><span class="cpt">使用优惠券</span></div>';
     if(cpOn){
       h+='<div style="display:flex;gap:8px;margin:6px 0 8px"><input id="cpCode" maxlength="24" placeholder="请输入优惠券" value="'+esc(cpCode||'')+'" style="flex:1;box-sizing:border-box;border-radius:0;border:1px solid #dfe6f2;padding:10px;font-size:14px"><button id="cpUse" style="border-radius:0;border:0;background:#222;color:#fff;font-weight:700;padding:0 14px">使用</button></div>';
-      h+='<div style="font-size:12px;color:#8b97ab;margin-bottom:8px" id="cpTip">'+(cpOk?('正在免 '+off+' 元中'):'')+'</div>';
+      h+='<div style="font-size:12px;color:#ff5f8f;margin-bottom:8px" id="cpTip">'+(cpOk?('减去完成，已减去 '+off+' 元'):'')+'</div>';
     }
     if(picks.length){
       h+='<div style="font-size:13px;color:#6b7a92;margin-bottom:8px">选择支付方式</div><div class="pay">';
@@ -803,8 +803,20 @@ function buySheet(p){
     if(use)use.onclick=function(){
       var i=document.getElementById('cpCode');cpCode=i?(i.value||'').trim():'';
       var c=findCp(cpCode);
-      if(!c||(Number(c.u||0))>=300||Number(c.a||0)<=0){cpOk=false;cpAmt=0;toast('优惠券不正确或输入错了，请重新输入');draw();return}
-      cpAmt=Math.min(Number(c.a||0),Number(p.price)||0);cpOk=true;toast('正在免 '+cpAmt+' 元中');draw();
+      var off=c?Math.min(Number(c.a||0),Number(p.price)||0):0;
+      if(!c||(Number(c.u||0))>=300||off<=0){cpOk=false;cpAmt=0;toast('优惠券不正确或输入错了，请重新输入');draw();return}
+      if(cpBusy)return; cpBusy=true;
+      var t=document.getElementById('cpTip'); if(t)t.textContent='正在检测优惠券是否一致…';
+      toast('正在检测优惠券是否一致…');
+      setTimeout(function(){
+        toast('检测一致，正在减去 '+yuan(off)+' 元…');
+        var t2=document.getElementById('cpTip'); if(t2)t2.textContent='正在减去 '+yuan(off)+' 元中…';
+        setTimeout(function(){
+          cpBusy=false; cpAmt=off; cpOk=true;
+          draw();
+          toast('减去完成，已减去 '+yuan(off)+' 元');
+        },900);
+      },900);
     };
   },0);
 }
