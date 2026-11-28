@@ -165,7 +165,8 @@ document.addEventListener('click',function(e){
 });
 function rHome(){
   var s=SHOP;
-  if(!s){$('pages').innerHTML='<div class="gcard"><div class="empty">还没有店铺</div></div>';return}
+  if(!s){$('pages').innerHTML='<div class="gcard"><div class="gh">我的店铺</div><div class="empty">这个账号还没有店铺<br>回漫花鹿Pro 开店后这里就会显示</div>'+
+    '<div class="prow"><span>去前台</span><a class="la" href="web.html">登录网页版</a></div></div>';return}
   var pub='https://manhualupro.github.io/shop/'+(s.slug||'');
   $('pages').innerHTML='<div class="gcard"><div class="gh">我的店铺</div>'+
     '<div class="srow"><div class="sic">'+esc(String(s.name||'漫').slice(0,1))+'</div>'+
