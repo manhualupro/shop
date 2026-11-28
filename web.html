@@ -120,6 +120,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
       <button class="btn" id="doLogin">登 录</button>
       <button class="btn ghost" id="toReg">没有账号？注册新账号</button>
     </div>
+    <div id="pubAnn" style="display:none;margin:0 0 12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.95);box-shadow:0 6px 18px rgba(40,70,140,.10);font-size:12.5px;line-height:1.6;color:#3a4152;text-align:left"></div>
     <div class="auth-badges"><span>液态玻璃</span><span>自助开店</span><span>卡密发货</span></div>
     <div class="note">网页版与 APP 用同一个云端账号，登录后店铺、商品、成交、保证金完全一致</div>
     <div class="auth-app" id="authRow">
@@ -169,6 +170,19 @@ function sb(path,opt){
   opt.headers=Object.assign({'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},opt.headers||{});
   return fetch(SB+path,opt).then(function(r){return r.json()});
 }
+
+/* 公告：与 APP / 下载站同一份，改完这里自动同步 */
+(function(){
+  function pull(){
+    fetch(CLOUD+'/pub',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+      var el=document.getElementById('pubAnn');
+      if(!el||!j||!j.notice)return;
+      el.innerHTML='<b style="color:#2f6df6">店铺公告</b><br>'+esc(j.notice).replace(/\n/g,'<br>');
+      el.style.display='block';
+    }).catch(function(){});
+  }
+  pull(); setInterval(pull,20000);
+})();
 function acc(){try{return JSON.parse(localStorage.getItem('mhl_web_acc')||'null')}catch(e){return null}}
 function setAcc(a){localStorage.setItem('mhl_web_acc',JSON.stringify(a))}
 function clearAcc(){localStorage.removeItem('mhl_web_acc')}
