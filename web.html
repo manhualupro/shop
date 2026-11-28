@@ -92,17 +92,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 .empty{text-align:center;color:#a2aab9;font-size:13px;padding:26px 0}
 .toast{position:fixed;left:50%;bottom:86px;transform:translate(-50%,18px);background:rgba(28,36,52,.92);color:#fff;font-size:13px;padding:10px 16px;border-radius:999px;opacity:0;transition:.25s;z-index:99;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-#jump{position:fixed;inset:0;z-index:65;display:none;flex-direction:column;align-items:center;justify-content:center;
- background:linear-gradient(170deg,#e7f0ff 0%,#f4f9ff 45%,#ffffff 100%);padding:30px}
-#jump.on{display:flex}
-#jump .j-ic{width:92px;height:92px;border-radius:26px;box-shadow:0 16px 34px rgba(24,42,84,.18)}
-#jump .j-t{font-size:20px;font-weight:800;margin-top:20px;letter-spacing:.5px}
-#jump .j-s{font-size:13px;color:#77839a;margin-top:8px;text-align:center;line-height:1.8}
-#jump .j-sp{width:34px;height:34px;border-radius:50%;border:3px solid #dfe9fb;border-top-color:#2f6df6;margin-top:22px;animation:sp .9s linear infinite}
-#jump .j-btn{display:none;width:100%;max-width:320px;height:50px;border:0;border-radius:15px;margin-top:22px;
- background:linear-gradient(135deg,#2f6df6,#5a9bff);color:#fff;font-size:15.5px;font-weight:800}
-#jump .j-ok{display:none;width:64px;height:64px;border-radius:50%;background:#e8f8ee;color:#22b455;font-size:34px;font-weight:800;
- margin-top:12px;align-items:center;justify-content:center}
 .upd{position:fixed;inset:0;background:rgba(14,20,32,.55);display:none;align-items:center;justify-content:center;padding:22px;z-index:70}
 .upd.on{display:flex}
 .upd-card{width:100%;max-width:330px;background:#fff;border-radius:20px;padding:20px 18px 16px;text-align:center}
@@ -152,14 +141,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
   </div>
 </div>
 
-<div id="jump">
-  <img class="j-ic" src="appicon.png" alt="">
-  <div class="j-t" id="jTitle">正在跳转到漫花鹿Pro 授权登录中</div>
-  <div class="j-s" id="jSub">请在手机上打开漫花鹿Pro，在授权页点「授权登录」</div>
-  <div class="j-sp" id="jSp"></div>
-  <div class="j-ok" id="jOk">✓</div>
-  <button class="j-btn" id="jBtn">打开漫花鹿Pro</button>
-</div>
 <div class="toast" id="toast"></div>
 <div class="upd" id="upd">
   <div class="upd-card">
@@ -220,20 +201,21 @@ function showDlg(html){var m=document.createElement('div');m.className='mask';m.
 function startAuth(){
   var rid='r'+Date.now()+Math.floor(Math.random()*900);
   clearAcc();
+  /* 必须在点击的同一帧内拉起 APP，否则浏览器会拦截 */
+  try{
+    var a=document.createElement('a');
+    a.href='intent://#Intent;package=com.manhualu.pro;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end';
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){try{a.remove()}catch(e){}},1200);
+  }catch(e){
+    try{location.href='manhualupro://open'}catch(x){}
+  }
   var sub=document.querySelector('.auth-app .tx');
   if(sub)sub.innerHTML='<b>已发送授权请求</b>请在漫花鹿Pro 里点「授权登录」';
   sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
-  try{location.href='manhualupro://open'}catch(e){}
-  setTimeout(function(){
-    try{
-      var ifr=document.createElement('iframe');
-      ifr.style.display='none';
-      ifr.src='intent://open#Intent;scheme=manhualupro;package=com.manhualu.pro;end';
-      document.body.appendChild(ifr);
-      setTimeout(function(){try{ifr.remove()}catch(e){}},1500);
-    }catch(e){}
-  },700);
   var iv=setInterval(function(){
     sb('/shop?select=data&k=eq.webauth').then(function(rows){
       var d=(rows&&rows[0]&&rows[0].data)||{};
