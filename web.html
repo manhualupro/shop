@@ -237,50 +237,40 @@ function showDlg(html){var m=document.createElement('div');m.className='mask';m.
 function startAuth(){
   var rid='r'+Date.now()+Math.floor(Math.random()*900);
   clearAcc();
-  /* 必须在点击的同一帧内拉起 APP，否则浏览器会拦截 */
+  /* 只写自己这一个编号的行，不碰公共行，别人收不到 */
+  sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify([{k:'webauth_'+rid,data:{st:'wait',rid:rid,at:Date.now()}}])});
+  /* 同一次点击里拉起 APP */
   try{
     var a=document.createElement('a');
-    a.href='intent://#Intent;package=com.manhualu.pro;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end';
-    a.style.display='none';
-    document.body.appendChild(a);
-    a.click();
+    a.href='manhualupro://auth?rid='+rid;
+    a.style.display='none';document.body.appendChild(a);a.click();
     setTimeout(function(){try{a.remove()}catch(e){}},1200);
-  }catch(e){
-    try{location.href='manhualupro://open'}catch(x){}
-  }
+  }catch(e){}
+  try{location.href='intent://auth?rid='+rid+'#Intent;package=com.manhualu.pro;scheme=manhualupro;end'}catch(e){}
   var sub=document.querySelector('.auth-app .tx');
-  if(sub)sub.innerHTML='<b>已发送授权请求</b>请在漫花鹿Pro 里点「授权登录」';
-  /* 兜底：有些浏览器拦 intent，1.4 秒还没跳过去就给一个手点按钮 */
+  if(sub)sub.innerHTML='<b>正在打开漫花鹿Pro…</b>在 App 里点「授权登录」就完成';
   setTimeout(function(){
     if(document.hidden)return;
-    var row=document.getElementById('authRow');
-    if(!row)return;
-    var old=document.getElementById('authManual');
-    if(old)old.remove();
+    var row=document.getElementById('authRow');if(!row)return;
+    var old=document.getElementById('authManual');if(old)old.remove();
     var b=document.createElement('button');
-    b.id='authManual';b.className='btn';
-    b.style.marginTop='10px';
+    b.id='authManual';b.className='btn';b.style.marginTop='10px';
     b.textContent='没跳过去？点这里打开漫花鹿Pro';
-    b.onclick=function(){
-      try{location.href='manhualupro://open'}catch(e){}
-      setTimeout(function(){try{location.href='intent://#Intent;package=com.manhualu.pro;action=android.intent.action.VIEW;end'}catch(e){}},60);
-    };
+    b.onclick=function(){try{location.href='manhualupro://auth?rid='+rid}catch(e){}};
     row.parentNode.appendChild(b);
-  },1400);
-  sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
+  },1500);
   var iv=setInterval(function(){
-    sb('/shop?select=data&k=eq.webauth').then(function(rows){
+    sb('/shop?select=data&k=eq.'+encodeURIComponent('webauth_'+rid)).then(function(rows){
       var d=(rows&&rows[0]&&rows[0].data)||{};
       if(d.st!=='ok'||d.rid!==rid)return;
       clearInterval(iv);
       setAcc({user:d.user,token:d.tok,at:Date.now()});
-      sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-        body:JSON.stringify([{k:'webauth',data:{st:'',at:Date.now()}}])});
-      toast('授权登录完成');
-      enterApp();
+      toast('授权登录完成，正在返回网站…');
+      setTimeout(function(){ enterApp(); toast('登录成功'); },400);
     }).catch(function(){});
-  },1200);
+  },1500);
+  setTimeout(function(){clearInterval(iv)},120000);
 }
 var ar=$('authRow');
 if(ar){ar.onclick=function(e){e.preventDefault();startAuth()}}
