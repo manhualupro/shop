@@ -1,53 +1,351 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>漫花鹿Pro 网页版</title><link rel="icon" href="appicon.png">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>漫花鹿Pro 网页版</title>
+<meta name="theme-color" content="#2f6df6">
+<link rel="icon" href="appicon.png">
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#eef4ff,#f7f9ff 42%,#fff);color:#22262f;min-height:100vh}
-.wrap{max-width:560px;margin:0 auto;padding:26px 18px 40px}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
-.brand img{width:46px;height:46px;border-radius:12px;background:#fff;object-fit:cover}
-.brand b{font-size:19px}
-.hero{background:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 28px rgba(40,70,140,.09);border:1px solid #e9effb}
-.hero h1{margin:0 0 6px;font-size:20px}
-.hero p{margin:0;color:#6b7280;font-size:13.5px;line-height:1.7}
-.field{margin-top:16px}
-.field input{width:100%;height:46px;border-radius:12px;border:1px solid #e2e9f6;background:#f8faff;padding:0 14px;font-size:14px;outline:none}
-.field input:focus{border-color:#2f6df6;background:#fff}
-.btn{display:block;width:100%;height:46px;border-radius:12px;border:0;background:#2f6df6;color:#fff;font-size:15px;font-weight:700;margin-top:12px;cursor:pointer}
-.btn.ghost{background:#fff;color:#2f6df6;border:1px solid #cfdefc}
-.tip{font-size:12px;color:#9aa3b2;margin-top:10px;line-height:1.6}
-.card{margin-top:18px;background:#fff;border-radius:16px;border:1px solid #e9effb;padding:16px}
-.card h2{margin:0 0 10px;font-size:15px}
-.card ul{margin:0;padding-left:18px;color:#555c6b;font-size:13.5px;line-height:1.9}
-.foot{text-align:center;color:#a8b0bd;font-size:12px;margin-top:26px;line-height:1.8}
-</style></head><body>
-<div class="wrap">
-  <div class="brand"><img src="appicon.png" alt=""><b>漫花鹿Pro 网页版</b></div>
-  <div class="hero">
-    <h1>输入店铺地址，在线进店</h1>
-    <p>填店铺后缀、短链接或完整地址都行。想管理自己的店，用 App 里的「店铺链接」复制短链接发出去即可。</p>
-    <div class="field"><input id="q" placeholder="例如 mhl1a2b 或 xiaoyue" autocomplete="off"></div>
-    <button class="btn" id="go">进入店铺</button>
-    <button class="btn ghost" id="dl">下载漫花鹿Pro App</button>
-    <div class="tip">网页版只做浏览与下单，商品编辑、公告、卡密这些在 App 里改。</div>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+ background:#eef3fb;color:#161c2b;overflow:hidden}
+#login{position:fixed;inset:0;overflow-y:auto;background:linear-gradient(170deg,#e7f0ff 0%,#f4f9ff 42%,#ffffff 100%);z-index:30}
+.auth{max-width:420px;margin:0 auto;min-height:100%;padding:48px 22px 40px;display:flex;flex-direction:column;align-items:center;position:relative}
+.auth-glow{position:absolute;width:280px;height:280px;left:50%;top:-90px;transform:translateX(-50%);border-radius:50%;
+ background:radial-gradient(circle,rgba(90,155,255,.32),rgba(90,155,255,0) 70%);pointer-events:none}
+.ico-wrap{position:relative;z-index:2}
+.brand-ico{width:76px;height:76px;border-radius:22px;display:block;box-shadow:0 14px 28px rgba(24,42,84,.18)}
+.brand-h1{font-size:24px;font-weight:800;margin-top:14px;letter-spacing:.5px;position:relative;z-index:2}
+.brand-sub{font-size:11.5px;color:#8b95a8;letter-spacing:2px;margin-top:6px;position:relative;z-index:2}
+.auth-card{width:100%;margin-top:24px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.92);
+ border-radius:22px;padding:20px 18px;box-shadow:0 18px 40px rgba(24,42,84,.10);backdrop-filter:blur(16px)}
+.field{margin-bottom:14px}
+.label{font-size:12.5px;color:#7b8496;font-weight:700;margin:0 0 8px 2px;display:block}
+.input{width:100%;height:50px;border:1px solid #e2e9f5;border-radius:16px;background:#fff;padding:0 16px;
+ font-size:15px;outline:none;font-family:inherit;color:#161c2b}
+.input:focus{border-color:#9dc0ff;box-shadow:0 0 0 3px rgba(47,109,246,.10)}
+.btn{width:100%;height:50px;border:0;border-radius:16px;font-size:16px;font-weight:800;
+ background:linear-gradient(135deg,#2f6df6,#5a9bff);color:#fff;box-shadow:0 10px 24px rgba(47,109,246,.28)}
+.btn.ghost{background:#fff;color:#33405a;border:1px solid #e2e9f5;box-shadow:none;margin-top:10px;font-weight:700}
+.auth-badges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2}
+.auth-badges span{font-size:11.5px;color:#5f6a80;background:rgba(255,255,255,.75);border:1px solid #e5ecf7;padding:5px 11px;border-radius:999px}
+.note{max-width:340px;text-align:center;font-size:11.5px;color:#95a0b2;line-height:1.8;margin-top:16px;position:relative;z-index:2}
+.auth-app{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:22px;position:relative;z-index:2;cursor:pointer}
+.auth-app .circle{width:52px;height:52px;border-radius:50%;border:2px solid #2f6df6;background:#fff;padding:3px;
+ box-shadow:0 8px 20px rgba(47,109,246,.24);display:flex;align-items:center;justify-content:center}
+.auth-app .circle img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.auth-app .tx{font-size:12.5px;color:#5a6478;line-height:1.6}
+.auth-app .tx b{display:block;color:#22304a;font-size:13.5px;font-weight:800}
+.mask{position:fixed;inset:0;background:rgba(14,20,32,.55);display:flex;align-items:center;justify-content:center;padding:22px;z-index:60}
+.dlg{width:100%;max-width:340px;background:#fff;border-radius:22px;padding:22px 20px 18px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.dlg .ic{width:56px;height:56px;border-radius:16px;display:block;margin:0 auto 10px}
+.dlg h3{margin:0;font-size:19px;font-weight:800}
+.dlg .tx{margin-top:10px;font-size:13.5px;line-height:1.9;color:#4c5668;text-align:left}
+.dlg .tx b{color:#2f6df6}
+.dlg .btns{display:flex;gap:10px;margin-top:16px}
+.dlg .btns button{flex:1;height:46px;border-radius:13px;border:0;font-size:15px;font-weight:800}
+.b-no{background:#eff2f7;color:#4a5468}
+.b-yes{background:#2f6df6;color:#fff}
+.b-open{background:#ff7a1a;color:#fff;flex:2}
+.spin{width:42px;height:42px;border-radius:50%;border:3px solid #e6edfb;border-top-color:#2f6df6;margin:4px auto 14px;animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.okic{width:46px;height:46px;border-radius:50%;background:#e8f8ee;color:#22b455;font-size:24px;font-weight:800;
+ display:flex;align-items:center;justify-content:center;margin:2px auto 12px}
+#app{position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;max-width:760px;display:none;flex-direction:column;
+ background:#f4f6fb;box-shadow:0 0 40px rgba(24,42,84,.06)}
+#app.on{display:flex}
+.pg-top{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1px solid #eef1f7}
+.pg-top .tt{font-size:16px;font-weight:800}
+.pg-top .rt{font-size:12px;color:#2f6df6;font-weight:700;background:#eaf1ff;padding:5px 11px;border-radius:999px}
+#pages{flex:1 1 auto;overflow-y:auto;padding:14px 14px 18px}
+.nav{flex:0 0 auto;display:flex;background:#fff;border-top:1px solid #eef1f7;padding:6px 4px 8px}
+.nav .nv{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:#8a93a6;padding:4px 0;border:0;background:none}
+.nav .nv.on{color:#2f6df6;font-weight:800}
+.nav .nv svg{width:21px;height:21px;display:block}
+.card{background:#fff;border:1px solid #e9eefa;border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:0 6px 16px rgba(24,42,84,.05)}
+.card-h{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:#5f6a80;margin-bottom:10px}
+.shop-row{display:flex;align-items:center;gap:12px}
+.shop-ic{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#2f6df6,#7fb2ff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}
+.shop-m{flex:1;min-width:0}
+.shop-nm{font-size:16px;font-weight:800}
+.shop-sl{font-size:12px;color:#8a93a6;margin-top:4px}
+.stat3{display:flex;margin-top:14px;border-top:1px solid #f1f4fa;padding-top:12px}
+.stat3 div{flex:1;text-align:center}
+.stat3 b{display:block;font-size:17px;font-weight:800}
+.stat3 span{font-size:11.5px;color:#8a93a6}
+.prow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f2f5fa;font-size:14px}
+.prow:last-child{border-bottom:0}
+.prow .v{color:#8a93a6;font-size:12.5px}
+.link-a{color:#2f6df6;font-weight:700;text-decoration:none;font-size:13px}
+.msg-item{display:flex;gap:10px;padding:12px 0;border-bottom:1px dashed #eef2f9}
+.msg-item:last-child{border-bottom:0}
+.msg-av{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:linear-gradient(135deg,#2f6df6,#7fb2ff);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.msg-c{flex:1;min-width:0}
+.msg-h{display:flex;justify-content:space-between;font-size:12px;color:#98a1b2}
+.msg-h b{color:#33405a;font-size:12.5px}
+.msg-t{font-size:13.5px;line-height:1.7;margin-top:3px;white-space:pre-wrap;word-break:break-word}
+.reply{display:flex;gap:8px;margin-top:12px}
+.reply input{flex:1;height:42px;border:1px solid #e2e9f6;border-radius:11px;padding:0 12px;font-size:13.5px;outline:none;font-family:inherit}
+.reply button{width:76px;height:42px;border:0;border-radius:11px;background:#2f6df6;color:#fff;font-size:13.5px;font-weight:800}
+.empty{text-align:center;color:#a2aab9;font-size:13px;padding:26px 0}
+.toast{position:fixed;left:50%;bottom:86px;transform:translate(-50%,18px);background:rgba(28,36,52,.92);color:#fff;font-size:13px;padding:10px 16px;border-radius:999px;opacity:0;transition:.25s;z-index:99;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.upd{position:fixed;inset:0;background:rgba(14,20,32,.55);display:none;align-items:center;justify-content:center;padding:22px;z-index:70}
+.upd.on{display:flex}
+.upd-card{width:100%;max-width:330px;background:#fff;border-radius:20px;padding:20px 18px 16px;text-align:center}
+.upd-card h3{margin:0 0 6px;font-size:17px}
+.upd-card .uv{font-size:12.5px;color:#8a93a6;margin-bottom:10px}
+.upd-card .ut{font-size:13px;line-height:1.7;color:#5b6478;text-align:left;max-height:150px;overflow-y:auto;white-space:pre-wrap}
+.upd-card .ub{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+.upd-card .ub a,.upd-card .ub button{height:46px;border-radius:12px;border:0;font-size:14.5px;font-weight:800;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.ub-dl{background:linear-gradient(135deg,#2f6df6,#5a9bff);color:#fff}
+.ub-go{background:#eff2f7;color:#434e64}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="auth">
+    <div class="auth-glow"></div>
+    <div class="ico-wrap"><img class="brand-ico" src="appicon.png" alt="漫花鹿 Pro"></div>
+    <div class="brand-h1">漫花鹿 Pro</div>
+    <div class="brand-sub">MANHUALA PRO · 网页版</div>
+    <div class="auth-card">
+      <div class="field"><label class="label">用户名或邮箱</label>
+        <input class="input" id="au" placeholder="用户名 / 邮箱" autocomplete="username"></div>
+      <div class="field"><label class="label">密码</label>
+        <input class="input" id="ap" type="password" placeholder="请输入密码" autocomplete="current-password"></div>
+      <button class="btn" id="doLogin">登 录</button>
+      <button class="btn ghost" id="toReg">没有账号？注册新账号</button>
+    </div>
+    <div class="auth-badges"><span>液态玻璃</span><span>自助开店</span><span>卡密发货</span></div>
+    <div class="note">网页版与 APP 用同一个云端账号，登录后店铺、商品、成交、保证金完全一致</div>
+    <div class="auth-app" id="authRow">
+      <button class="circle" id="authBtn"><img src="appicon.png" alt=""></button>
+      <div class="tx"><b>使用漫花鹿Pro 授权登录</b>点这里跳到漫花鹿Pro，在 APP 里点授权登录就完成</div>
+    </div>
+
   </div>
-  <div class="card"><h2>网页版能做什么</h2>
-    <ul><li>在线看店铺商品、库存与价格</li><li>下单后查看订单与卡密</li><li>短链接可直接分享给客人</li></ul>
-  </div>
-  <div class="foot">漫花鹿Pro · 网页版<br>© 2026 manhualupro</div>
 </div>
+
+<div id="app">
+  <div class="pg-top"><div class="tt" id="pgTitle">主页</div><div class="rt" id="pgVer">v1.7.91</div></div>
+  <div id="pages"></div>
+  <div class="nav">
+    <button class="nv on" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg>主页</button>
+    <button class="nv" data-nav="msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="13" rx="3"/><path d="M8 21l4-3"/></svg>消息</button>
+    <button class="nv" data-nav="music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>听歌</button>
+    <button class="nv" data-nav="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>设置</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="upd" id="upd">
+  <div class="upd-card">
+    <h3>发现新版本</h3>
+    <div class="uv" id="updV">最新版本 1.7.91</div>
+    <div class="ut" id="updT"></div>
+    <div class="ub">
+      <a class="ub-dl" id="updDl" href="#" target="_blank" rel="noopener">下载 APK 软件版</a>
+      <button class="ub-go" id="updGo">继续使用网页最新版本</button>
+    </div>
+  </div>
+</div>
+
 <script>
-function go(){
-  var v=(document.getElementById('q').value||'').trim();
-  if(!v){alert('先填店铺地址或短码');return}
-  v=v.replace(/^https?:\/\//,'');
-  var m=v.match(/shop\/([^\/?#]+)/);
-  if(m)v=m[1];
-  v=v.replace(/\/+$/,'');
-  location.href='./'+encodeURIComponent(v);
+var CLOUD='https://manhualu-cloud.netlify.app';
+var SB='https://fjarlttqnznykmvlsxma.supabase.co/rest/v1';
+var KEY='sb_publishable_2SUA34qjRy_yB_AgMYW81A_2KTzfL94';
+var CUR={ver:'1.7.91',apk:'https://aka.doubaocdn.com/s/IUQTjW0XAo',note:''};
+var DB=null,CURSHOP=null;
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(window.__tt);window.__tt=setTimeout(function(){e.classList.remove('on')},1900)}
+function cFetch(path,opt){return fetch(CLOUD+path,opt||{}).then(function(r){return r.json()})}
+function sb(path,opt){
+  opt=opt||{};
+  opt.headers=Object.assign({'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},opt.headers||{});
+  return fetch(SB+path,opt).then(function(r){return r.json()});
 }
-document.getElementById('go').onclick=go;
-document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')go()});
-document.getElementById('dl').onclick=function(){location.href='./download.html'};
-</script></body></html>
+function acc(){try{return JSON.parse(localStorage.getItem('mhl_web_acc')||'null')}catch(e){return null}}
+function setAcc(a){localStorage.setItem('mhl_web_acc',JSON.stringify(a))}
+function clearAcc(){localStorage.removeItem('mhl_web_acc')}
+
+function login(u,p){
+  u=(u||'').trim();
+  if(!u||!p){toast('请填写用户名和密码');return}
+  cFetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})})
+  .then(function(r){
+    if(!r||!r.ok){toast(r&&r.msg?r.msg:'登录失败');return}
+    setAcc({user:r.username,token:r.token,at:Date.now()});
+    toast('登录成功，正在同步店铺…');
+    enterApp();
+  }).catch(function(){toast('网络不通，稍后再试')});
+}
+$('doLogin').onclick=function(){login($('au').value,$('ap').value)};
+$('ap').addEventListener('keydown',function(e){if(e.key==='Enter')login($('au').value,$('ap').value)});
+$('toReg').onclick=function(){
+  var u=$('au').value.trim(),p=$('ap').value;
+  if(!u||!p){toast('填好用户名和密码再注册');return}
+  var em=u.toLowerCase().replace(/[^a-z0-9]/g,'')+'@manhualu.local';
+  cFetch('/reg',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,email:em,password:p})})
+  .then(function(r){
+    if(!r||!r.ok){toast(r&&r.msg?('注册失败：'+r.msg):'注册失败');return}
+    toast('注册成功，正在登录…');login(u,p);
+  }).catch(function(){toast('网络不通，稍后再试')});
+};
+
+function showDlg(html){var m=document.createElement('div');m.className='mask';m.innerHTML='<div class="dlg">'+html+'</div>';document.body.appendChild(m);return m}
+function startAuth(){
+  var rid='r'+Date.now()+Math.floor(Math.random()*900);
+  clearAcc();
+  /* 必须在点击的同一帧内拉起 APP，否则浏览器会拦截 */
+  try{
+    var a=document.createElement('a');
+    a.href='intent://#Intent;package=com.manhualu.pro;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end';
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){try{a.remove()}catch(e){}},1200);
+  }catch(e){
+    try{location.href='manhualupro://open'}catch(x){}
+  }
+  var sub=document.querySelector('.auth-app .tx');
+  if(sub)sub.innerHTML='<b>已发送授权请求</b>请在漫花鹿Pro 里点「授权登录」';
+  sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
+  var iv=setInterval(function(){
+    sb('/shop?select=data&k=eq.webauth').then(function(rows){
+      var d=(rows&&rows[0]&&rows[0].data)||{};
+      if(d.st!=='ok'||d.rid!==rid)return;
+      clearInterval(iv);
+      setAcc({user:d.user,token:d.tok,at:Date.now()});
+      sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+        body:JSON.stringify([{k:'webauth',data:{st:'',at:Date.now()}}])});
+      toast('授权登录完成');
+      enterApp();
+    }).catch(function(){});
+  },1200);
+}
+var ar=$('authRow');
+if(ar){ar.onclick=function(e){e.preventDefault();startAuth()}}
+var ab=$('authBtn');
+if(ab){ab.onclick=function(e){e.preventDefault();e.stopPropagation();startAuth()}}
+
+var TAB='home';
+function enterApp(){
+  $('login').style.display='none';
+  $('app').classList.add('on');
+  loadData();checkUpdate();
+}
+function loadData(){
+  var a=acc();if(!a||!a.token){go(TAB);return}
+  cFetch('/data',{headers:{'X-Token':a.token}}).then(function(d){
+    var db=null;try{db=JSON.parse((d&&d.data)||'')}catch(e){}
+    if(db&&db.shops)DB=db;
+    var u=(DB&&DB.users&&DB.users[String(a.user||'').toLowerCase()])||null;
+    var sid=u&&u.shopId;
+    CURSHOP=(sid&&DB&&DB.shops&&DB.shops[sid])||null;
+    if(!CURSHOP&&DB&&DB.shops){var ks=Object.keys(DB.shops);if(ks.length)CURSHOP=DB.shops[ks[0]];}
+    go(TAB);
+  }).catch(function(){go(TAB)});
+}
+function go(t){
+  TAB=t;
+  var nvs=document.querySelectorAll('.nav .nv');
+  for(var i=0;i<nvs.length;i++)nvs[i].classList.toggle('on',nvs[i].getAttribute('data-nav')===t);
+  $('pgTitle').textContent=({home:'主页',msg:'消息',music:'听歌',set:'设置'})[t]||'主页';
+  if(t==='home')renderHome();
+  if(t==='msg')renderMsg();
+  if(t==='music')renderMusic();
+  if(t==='set')renderSet();
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('[data-nav]'):null;
+  if(b)go(b.getAttribute('data-nav'));
+});
+function renderHome(){
+  var s=CURSHOP;
+  if(!s){$('pages').innerHTML='<div class="card"><div class="empty">还没有店铺，去漫花鹿Pro APP 里创建</div></div>';return}
+  var prods=(s.prods||[]).length;
+  var pub='https://manhualupro.github.io/shop/'+(s.slug||s.id||'');
+  $('pages').innerHTML='<div class="card"><div class="card-h">我的店铺</div>'+
+    '<div class="shop-row"><div class="shop-ic">'+esc(String(s.name||'漫').slice(0,1))+'</div>'+
+    '<div class="shop-m"><div class="shop-nm">'+esc(s.name||'未命名店铺')+'</div>'+
+    '<div class="shop-sl">/shop/'+esc(s.slug||'')+'</div></div></div>'+
+    '<div class="stat3"><div><b>'+prods+'</b><span>商品</span></div>'+
+    '<div><b>'+(s.sales||0)+'</b><span>成交</span></div>'+
+    '<div><b>'+(Math.round(Number(s.bond||0)*10)/10)+'</b><span>保证金(元)</span></div></div></div>'+
+    '<div class="card"><div class="card-h">快捷入口</div>'+
+    '<div class="prow"><span>店铺公网地址</span><a class="link-a" href="'+pub+'" target="_blank" rel="noopener">打开</a></div>'+
+    '<div class="prow"><span>下载最新 APK</span><a class="link-a" href="'+CUR.apk+'" target="_blank" rel="noopener">下载</a></div></div>';
+}
+function renderMsg(){
+  $('pages').innerHTML='<div class="card"><div class="card-h">访客与买家留言</div><div id="msgBox"><div class="empty">加载中…</div></div>'+
+    '<div class="reply"><input id="rpTx" placeholder="回复最新一条留言…"><button id="rpBtn">回复</button></div></div>';
+  loadMsg();
+}
+function loadMsg(){
+  sb('/shop?select=data&k=eq.msg').then(function(rows){
+    var list=((rows&&rows[0]&&rows[0].data)||{}).list||[];
+    window.__msgs=list;
+    if(!list.length){$('msgBox').innerHTML='<div class="empty">还没有留言</div>';return}
+    $('msgBox').innerHTML=list.slice(0,20).map(function(m){
+      var re=m.reply?('<div style="margin-top:8px;background:#eef5ff;border-radius:10px;padding:8px 10px;font-size:12.5px;color:#2f6df6;line-height:1.7">回复：'+esc(m.reply)+'</div>'):'';
+      return '<div class="msg-item"><div class="msg-av">'+esc(String(m.name||'漫').slice(0,1))+'</div>'+
+        '<div class="msg-c"><div class="msg-h"><b>'+esc(m.name||'匿名')+'</b><span>'+esc(m.at||'')+'</span></div>'+
+        '<div class="msg-t">'+esc(m.txt)+'</div>'+re+'</div></div>';
+    }).join('');
+  }).catch(function(){$('msgBox').innerHTML='<div class="empty">读取失败</div>'});
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest)return;
+  if(!e.target.closest('#rpBtn'))return;
+  var tx=$('rpTx').value.trim();if(!tx){toast('先写回复内容');return}
+  var list=window.__msgs||[];if(!list.length){toast('没有可回复的留言');return}
+  list[0].reply=tx;
+  sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify([{k:'msg',data:{list:list}}])}).then(function(){toast('已回复');$('rpTx').value='';loadMsg();})
+    .catch(function(){toast('回复失败')});
+});
+function renderMusic(){
+  $('pages').innerHTML='<div class="card"><div class="card-h">店铺背景音乐</div>'+
+    '<div class="empty">网页版暂不支持播放本地音频<br>请在漫花鹿Pro APP 里设置</div></div>';
+}
+function renderSet(){
+  var a=acc()||{user:'未登录'};
+  $('pages').innerHTML='<div class="card"><div class="card-h">账号</div>'+
+    '<div class="prow"><span>网页版账号</span><span class="v">'+esc(a.user)+' · 已登录</span></div>'+
+    '<div class="prow"><span>漫花鹿Pro 账号</span><a class="link-a" href="intent://node#Intent;package=com.manhualu.pro;end">打开 APP</a></div>'+
+    '<div class="prow"><span>账号同步</span><span class="v">云端同步中</span></div></div>'+
+    '<div class="card"><div class="card-h">版本</div>'+
+    '<div class="prow"><span>当前版本</span><span class="v">v'+CUR.ver+'</span></div>'+
+    '<div class="prow"><span>检查更新</span><a class="link-a" id="chkUp" href="#">检查</a></div></div>'+
+    '<div class="card"><div class="card-h">其他</div>'+
+    '<div class="prow"><span>退出登录</span><a class="link-a" id="logout" href="#">退出</a></div></div>';
+  $('chkUp').onclick=function(e){e.preventDefault();checkUpdate(true)};
+  $('logout').onclick=function(e){e.preventDefault();clearAcc();location.reload()};
+}
+function checkUpdate(manual){
+  sb('/shop?select=data&k=eq.app').then(function(rows){
+    var d=(rows&&rows[0]&&rows[0].data)||{};
+    if(d.ver)CUR.ver=d.ver;if(d.apk)CUR.apk=d.apk;if(d.note)CUR.note=d.note;
+    $('pgVer').textContent='v'+CUR.ver;
+    var seen=localStorage.getItem('mhl_web_ver')||'';
+    localStorage.setItem('mhl_web_ver',CUR.ver);
+    if(manual&&seen===CUR.ver){toast('已是最新版本 v'+CUR.ver);return}
+    if(seen&&seen!==CUR.ver){
+      $('updV').textContent='最新版本 '+CUR.ver+'（你当前是 '+seen+'）';
+      $('updT').textContent=CUR.note||'网页版已同步到最新版本。';
+      $('updDl').href=CUR.apk;
+      $('upd').classList.add('on');
+    }
+  }).catch(function(){if(manual)toast('检查更新失败')});
+}
+$('updGo').onclick=function(){$('upd').classList.remove('on');location.reload()};
+
+</script>
+</body>
+</html>
