@@ -32,7 +32,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 .auth-badges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2}
 .auth-badges span{font-size:11.5px;color:#5f6a80;background:rgba(255,255,255,.75);border:1px solid #e5ecf7;padding:5px 11px;border-radius:999px}
 .note{max-width:340px;text-align:center;font-size:11.5px;color:#95a0b2;line-height:1.8;margin-top:16px;position:relative;z-index:2}
-.auth-app{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:22px;position:relative;z-index:2}
+.auth-app{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:22px;position:relative;z-index:2;cursor:pointer}
 .auth-app .circle{width:52px;height:52px;border-radius:50%;border:2px solid #2f6df6;background:#fff;padding:3px;
  box-shadow:0 8px 20px rgba(47,109,246,.24);display:flex;align-items:center;justify-content:center}
 .auth-app .circle img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
@@ -133,7 +133,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
     </div>
     <div class="auth-badges"><span>液态玻璃</span><span>自助开店</span><span>卡密发货</span></div>
     <div class="note">网页版与 APP 用同一个云端账号，登录后店铺、商品、成交、保证金完全一致</div>
-    <div class="auth-app">
+    <div class="auth-app" id="authRow">
       <button class="circle" id="authBtn"><img src="appicon.png" alt=""></button>
       <div class="tx"><b>使用漫花鹿Pro 授权登录</b>点这里跳到漫花鹿Pro，在 APP 里点授权登录就完成</div>
     </div>
@@ -217,43 +217,31 @@ $('toReg').onclick=function(){
 };
 
 function showDlg(html){var m=document.createElement('div');m.className='mask';m.innerHTML='<div class="dlg">'+html+'</div>';document.body.appendChild(m);return m}
-$('authBtn').onclick=jumpAuth;
-function jumpAuth(){
+function startAuth(){
   var rid='r'+Date.now()+Math.floor(Math.random()*900);
   clearAcc();
-  $('login').style.display='none';
-  $('app').classList.remove('on');
-  $('jump').classList.add('on');
-  $('jTitle').textContent='正在跳转到漫花鹿Pro 授权登录中';
-  $('jSub').textContent='请在漫花鹿Pro 里点「授权登录」，这里会自动完成';
-  $('jSp').style.display='block';
-  $('jOk').style.display='none';
-  $('jBtn').style.display='block';
-  $('jBtn').onclick=function(){location.href='intent://node#Intent;package=com.manhualu.pro;end'};
+  var sub=document.querySelector('.auth-app .tx');
+  if(sub)sub.innerHTML='<b>正在打开漫花鹿Pro…</b>请在 APP 里点「授权登录」';
   sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
+  try{location.href='intent://node#Intent;package=com.manhualu.pro;end'}catch(e){}
   var iv=setInterval(function(){
     sb('/shop?select=data&k=eq.webauth').then(function(rows){
       var d=(rows&&rows[0]&&rows[0].data)||{};
       if(d.st!=='ok'||d.rid!==rid)return;
       clearInterval(iv);
-      $('jTitle').textContent='授权登录完成';
-      $('jSub').textContent='正在进入网页版…';
-      $('jSp').style.display='none';
-      $('jOk').style.display='flex';
-      $('jBtn').style.display='none';
       setAcc({user:d.user,token:d.tok,at:Date.now()});
       sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
         body:JSON.stringify([{k:'webauth',data:{st:'',at:Date.now()}}])});
-      setTimeout(function(){
-        $('jump').classList.remove('on');
-        enterApp();
-      },900);
+      toast('授权登录完成');
+      enterApp();
     }).catch(function(){});
   },1200);
 }
-var a0=acc();
-if(a0&&a0.user&&a0.token){enterApp()}
+var ar=$('authRow');
+if(ar){ar.onclick=function(e){e.preventDefault();startAuth()}}
+var ab=$('authBtn');
+if(ab){ab.onclick=function(e){e.preventDefault();e.stopPropagation();startAuth()}}
 
 var TAB='home';
 function enterApp(){
