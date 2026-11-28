@@ -133,6 +133,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
     </div>
     <div class="auth-badges"><span>液态玻璃</span><span>自助开店</span><span>卡密发货</span></div>
     <div class="note">网页版与 APP 用同一个云端账号，登录后店铺、商品、成交、保证金完全一致</div>
+    <div class="auth-app">
+      <button class="circle" id="authBtn"><img src="appicon.png" alt=""></button>
+      <div class="tx"><b>使用漫花鹿Pro 授权登录</b>点这里跳到漫花鹿Pro，在 APP 里点授权登录就完成</div>
+    </div>
 
   </div>
 </div>
@@ -213,6 +217,7 @@ $('toReg').onclick=function(){
 };
 
 function showDlg(html){var m=document.createElement('div');m.className='mask';m.innerHTML='<div class="dlg">'+html+'</div>';document.body.appendChild(m);return m}
+$('authBtn').onclick=jumpAuth;
 function jumpAuth(){
   var rid='r'+Date.now()+Math.floor(Math.random()*900);
   clearAcc();
@@ -247,10 +252,8 @@ function jumpAuth(){
     }).catch(function(){});
   },1200);
 }
-var qs=new URLSearchParams(location.search);
 var a0=acc();
-if(qs.get('auth')==='1'){jumpAuth()}
-else if(a0&&a0.user&&a0.token){enterApp()}
+if(a0&&a0.user&&a0.token){enterApp()}
 
 var TAB='home';
 function enterApp(){
