@@ -228,6 +228,23 @@ function startAuth(){
   }
   var sub=document.querySelector('.auth-app .tx');
   if(sub)sub.innerHTML='<b>已发送授权请求</b>请在漫花鹿Pro 里点「授权登录」';
+  /* 兜底：有些浏览器拦 intent，1.4 秒还没跳过去就给一个手点按钮 */
+  setTimeout(function(){
+    if(document.hidden)return;
+    var row=document.getElementById('authRow');
+    if(!row)return;
+    var old=document.getElementById('authManual');
+    if(old)old.remove();
+    var b=document.createElement('button');
+    b.id='authManual';b.className='btn';
+    b.style.marginTop='10px';
+    b.textContent='没跳过去？点这里打开漫花鹿Pro';
+    b.onclick=function(){
+      try{location.href='manhualupro://open'}catch(e){}
+      setTimeout(function(){try{location.href='intent://#Intent;package=com.manhualu.pro;action=android.intent.action.VIEW;end'}catch(e){}},60);
+    };
+    row.parentNode.appendChild(b);
+  },1400);
   sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
   var iv=setInterval(function(){
