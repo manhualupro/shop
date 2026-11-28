@@ -398,6 +398,17 @@ function startShop(){
 function _ck(){return 'mhl_c_'+SID}
 function _rc(){try{return JSON.parse(localStorage.getItem(_ck())||'null')}catch(e){return null}}
 function _wc(d){try{localStorage.setItem(_ck(),JSON.stringify(d||{}))}catch(e){}}
+function resolveShort(cb){
+  if(!SID)return cb();
+  fetch(SB_URL+'?select=data&k=eq.shortidx',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},cache:'no-store'})
+    .then(function(r){return r.json()})
+    .then(function(rows){
+      var m=(rows&&rows[0]&&rows[0].data)||null;
+      if(m&&m[SID]&&m[SID]!==SID){SID=m[SID];}
+      cb();
+    }).catch(function(){cb()});
+}
+resolveShort(function(){
 (function(){
   var c=_rc();var cached=null;
   if(c&&c.name){cached=JSON.stringify(c);SHOP=c;S=c;window.SHOP=c;try{startShop()}catch(e){}}
@@ -412,7 +423,7 @@ function _wc(d){try{localStorage.setItem(_ck(),JSON.stringify(d||{}))}catch(e){}
     if(cached&&JSON.stringify(SHOP)===cached)return;
     startShop();
   });
-})();
+})();});
 
 
 /* ===== 蓝色风格2 ===== */
