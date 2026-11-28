@@ -92,6 +92,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 .empty{text-align:center;color:#a2aab9;font-size:13px;padding:26px 0}
 .toast{position:fixed;left:50%;bottom:86px;transform:translate(-50%,18px);background:rgba(28,36,52,.92);color:#fff;font-size:13px;padding:10px 16px;border-radius:999px;opacity:0;transition:.25s;z-index:99;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+#jump{position:fixed;inset:0;z-index:65;display:none;flex-direction:column;align-items:center;justify-content:center;
+ background:linear-gradient(170deg,#e7f0ff 0%,#f4f9ff 45%,#ffffff 100%);padding:30px}
+#jump.on{display:flex}
+#jump .j-ic{width:92px;height:92px;border-radius:26px;box-shadow:0 16px 34px rgba(24,42,84,.18)}
+#jump .j-t{font-size:20px;font-weight:800;margin-top:20px;letter-spacing:.5px}
+#jump .j-s{font-size:13px;color:#77839a;margin-top:8px;text-align:center;line-height:1.8}
+#jump .j-sp{width:34px;height:34px;border-radius:50%;border:3px solid #dfe9fb;border-top-color:#2f6df6;margin-top:22px;animation:sp .9s linear infinite}
+#jump .j-btn{display:none;width:100%;max-width:320px;height:50px;border:0;border-radius:15px;margin-top:22px;
+ background:linear-gradient(135deg,#2f6df6,#5a9bff);color:#fff;font-size:15.5px;font-weight:800}
+#jump .j-ok{display:none;width:64px;height:64px;border-radius:50%;background:#e8f8ee;color:#22b455;font-size:34px;font-weight:800;
+ margin-top:12px;align-items:center;justify-content:center}
 .upd{position:fixed;inset:0;background:rgba(14,20,32,.55);display:none;align-items:center;justify-content:center;padding:22px;z-index:70}
 .upd.on{display:flex}
 .upd-card{width:100%;max-width:330px;background:#fff;border-radius:20px;padding:20px 18px 16px;text-align:center}
@@ -122,10 +133,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
     </div>
     <div class="auth-badges"><span>液态玻璃</span><span>自助开店</span><span>卡密发货</span></div>
     <div class="note">网页版与 APP 用同一个云端账号，登录后店铺、商品、成交、保证金完全一致</div>
-    <div class="auth-app">
-      <button class="circle" id="authBtn"><img src="appicon.png" alt=""></button>
-      <div class="tx"><b>使用漫花鹿Pro 授权登录</b>在 APP 里点同意，一个账号两块屏通用</div>
-    </div>
+
   </div>
 </div>
 
@@ -140,6 +148,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
   </div>
 </div>
 
+<div id="jump">
+  <img class="j-ic" src="appicon.png" alt="">
+  <div class="j-t" id="jTitle">正在跳转到漫花鹿Pro 授权登录中</div>
+  <div class="j-s" id="jSub">请在手机上打开漫花鹿Pro，在授权页点「授权登录」</div>
+  <div class="j-sp" id="jSp"></div>
+  <div class="j-ok" id="jOk">✓</div>
+  <button class="j-btn" id="jBtn">打开漫花鹿Pro</button>
+</div>
 <div class="toast" id="toast"></div>
 <div class="upd" id="upd">
   <div class="upd-card">
@@ -197,36 +213,39 @@ $('toReg').onclick=function(){
 };
 
 function showDlg(html){var m=document.createElement('div');m.className='mask';m.innerHTML='<div class="dlg">'+html+'</div>';document.body.appendChild(m);return m}
-$('authBtn').onclick=function(){
-  var code=String(Math.floor(100000+Math.random()*900000));
+function jumpAuth(){
+  var rid='r'+Date.now()+Math.floor(Math.random()*900);
+  $('jump').classList.add('on');
+  $('jTitle').textContent='正在跳转到漫花鹿Pro 授权登录中';
+  $('jSub').textContent='请在漫花鹿Pro 里点「授权登录」，这里会自动完成';
+  $('jSp').style.display='block';
+  $('jOk').style.display='none';
+  $('jBtn').style.display='block';
+  $('jBtn').onclick=function(){location.href='intent://node#Intent;package=com.manhualu.pro;end'};
   sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify([{k:'webauth',data:{st:'wait',code:code,at:Date.now()}}])});
-  var m=showDlg('<img class="ic" src="appicon.png"><h3>请在漫花鹿Pro 中确认</h3>'+
-    '<div class="tx">你正在授权网页版使用你的账号登录。<br>授权码：<b>'+code+'</b><br>点下面的按钮打开 APP，在 APP 弹窗里点「同意授权」，这里会自动登录。</div>'+
-    '<div class="btns"><button class="b-no" id="dNo">取消</button><button class="b-open" id="dOpen">打开漫花鹿Pro</button></div>');
-  m.querySelector('#dOpen').onclick=function(){location.href='intent://node#Intent;package=com.manhualu.pro;end'};
+    body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
   var iv=setInterval(function(){
     sb('/shop?select=data&k=eq.webauth').then(function(rows){
       var d=(rows&&rows[0]&&rows[0].data)||{};
-      if(d.st!=='ok'||d.code!==code)return;
+      if(d.st!=='ok'||d.rid!==rid)return;
       clearInterval(iv);
-      var card=m.querySelector('.dlg');
-      card.innerHTML='<div class="spin"></div><h3>授权成功，正在登录…</h3><div class="tx">账号：<b>'+esc(d.user||'')+'</b><br>正在同步店铺数据</div>';
+      $('jTitle').textContent='授权登录完成';
+      $('jSub').textContent='正在进入网页版…';
+      $('jSp').style.display='none';
+      $('jOk').style.display='flex';
+      $('jBtn').style.display='none';
       setAcc({user:d.user,token:d.tok,at:Date.now()});
       sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-        body:JSON.stringify([{k:'webauth',data:{st:'',code:code,at:Date.now()}}])});
+        body:JSON.stringify([{k:'webauth',data:{st:'',at:Date.now()}}])});
       setTimeout(function(){
-        card.innerHTML='<div class="okic">✓</div><h3>登录完成</h3><div class="tx">欢迎回来，'+esc(d.user||'')+'</div>';
-        setTimeout(function(){m.remove();enterApp();},800);
+        $('jump').classList.remove('on');
+        enterApp();
       },900);
     }).catch(function(){});
-  },1500);
-  m.querySelector('#dNo').onclick=function(){
-    clearInterval(iv);m.remove();
-    sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify([{k:'webauth',data:{st:'no',code:code,at:Date.now()}}])});
-  };
-};
+  },1200);
+}
+var qs=new URLSearchParams(location.search);
+if(qs.get('auth')==='1'){jumpAuth()}
 
 var TAB='home';
 function enterApp(){
