@@ -231,11 +231,12 @@ body.b2body{background:#f4f6fa}
 .cfoot button{border:0;background:#2f6df6;color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600}
 .crhint{padding:10px 14px;font-size:12px;color:#8b90a0;text-align:center}
 
-.paybtn{background:#fff!important;color:#222!important;border:1px solid #e2e6ee!important;border-radius:0!important}
-.paybtn.on{background:#fff!important;color:#111!important;border:1.5px solid #222!important}
+.paybtn{background:#fff!important;color:#222!important;border:1px solid #e7ebf3!important;border-radius:14px!important}
+.paybtn.on{background:#fff!important;color:#111!important;border:1.5px solid #2f6df6!important;border-radius:14px!important}
 .paybtn *{color:#222!important}
 .paybtn img{filter:none}
-.sheet .btn{background:#fff!important;color:#111!important;border:1.5px solid #222!important;border-radius:0!important}
+.sheet .btn{background:#fff!important;color:#111!important;border:1px solid #e7ebf3!important;border-radius:14px!important}
+.sheet input,.sheet textarea{border-radius:12px!important;border:1px solid #e7ebf3!important}
 .sheet{background:#fff!important;border-radius:0!important}
 </style>
 </head>
@@ -739,7 +740,7 @@ function buySheet(p){
     var h='<div class="t">'+esc(p.name)+'</div><div class="p">'+(Number(p.price)>0?(off>0?('<span style="color:#ff5f8f;font-weight:800">¥'+yuan(Number(p.price)-off)+'</span><span style="margin-left:10px;color:#9aa4b2;font-size:13px;text-decoration:line-through">¥'+yuan(p.price)+'</span><span style="margin-left:8px;color:#ff5f8f;font-size:12px;border:1px solid #ffd3e2;border-radius:999px;padding:1px 8px">已减 '+yuan(off)+' 元</span>'):('¥'+yuan(p.price))):'免费')+'</div>';
     h+='<div class="cprow" id="cpRow"><span class="cpbox'+(cpOn?' on':'')+'"></span><span class="cpt">使用优惠券</span></div>';
     if(cpOn){
-      h+='<div style="display:flex;gap:8px;margin:6px 0 8px"><input id="cpCode" maxlength="24" placeholder="请输入优惠券" value="'+esc(cpCode||'')+'" style="flex:1;box-sizing:border-box;border-radius:0;border:1px solid #dfe6f2;padding:10px;font-size:14px"><button id="cpUse" style="border-radius:0;border:0;background:#222;color:#fff;font-weight:700;padding:0 14px">使用</button></div>';
+      h+='<div style="display:flex;gap:8px;margin:6px 0 8px"><input id="cpCode" maxlength="24" placeholder="请输入优惠券" value="'+esc(cpCode||'')+'" style="flex:1;box-sizing:border-box;border-radius:12px;border:1px solid #dfe6f2;padding:10px;font-size:14px"><button id="cpUse" style="border-radius:12px;border:1px solid #e7ebf3;background:#fff;color:#222;font-weight:700;padding:0 14px">使用</button></div>';
       h+='<div style="font-size:12px;color:#ff5f8f;margin-bottom:8px" id="cpTip">'+(cpOk?('减去完成，已减去 '+off+' 元'):'')+'</div>';
     }
     if(picks.length){
@@ -756,6 +757,27 @@ function buySheet(p){
     h+='<input id="buyContact" inputmode="numeric" maxlength="6" placeholder="请输入6位联系方式" style="width:100%;box-sizing:border-box;border-radius:0;border:1px solid #dfe6f2;background:#fff;color:#222;padding:12px 14px;font-size:14px;margin-bottom:14px">';
     h+='<button class="btn'+(S.style==='blue'?' ':' pink')+'" id="payNow">立即支付</button>';
     $('sheet').innerHTML=h;
+    var _row=document.getElementById('cpRow');
+    if(_row)_row.onclick=function(){cpOn=!cpOn;cpOk=false;draw();};
+    var _use=document.getElementById('cpUse');
+    if(_use)_use.onclick=function(){
+      var i=document.getElementById('cpCode');cpCode=i?(i.value||'').trim():'';
+      var c=findCp(cpCode);
+      var off=c?Math.min(Number(c.a||0),Number(p.price)||0):0;
+      if(!c||(Number(c.u||0))>=300||off<=0){cpOk=false;cpAmt=0;toast('优惠券不正确或输入错了，请重新输入');draw();return}
+      if(cpBusy)return; cpBusy=true;
+      var t=document.getElementById('cpTip'); if(t)t.textContent='正在检测优惠券是否一致…';
+      toast('正在检测优惠券是否一致…');
+      setTimeout(function(){
+        toast('检测一致，正在减去 '+yuan(off)+' 元…');
+        var t2=document.getElementById('cpTip'); if(t2)t2.textContent='正在减去 '+yuan(off)+' 元中…';
+        setTimeout(function(){
+          cpBusy=false; cpAmt=off; cpOk=true;
+          draw();
+          toast('减去完成，已减去 '+yuan(off)+' 元');
+        },900);
+      },900);
+    };
     $('sheet').querySelectorAll('.paybtn').forEach(function(b){
       b.onclick=function(){
         var m=b.getAttribute('data-m');
@@ -798,6 +820,7 @@ function buySheet(p){
     var _off=(cpOk&&cpAmt>0)?Math.min(cpAmt,Number(prod.price)||0):0;
     if(_off>0){var _c=findCp(cpCode);if(_c){_c.u=(Number(_c.u)||0)+1;pushShop();}}
     var no='MH'+Date.now().toString().slice(-8)+Math.floor(Math.random()*90+10);
+    try{ S.orders=S.orders||[]; S.orders.unshift({no:no,prod:prod.name,key:key,price:Number(prod.price)||0,pay:Math.max(0,(Number(prod.price)||0)-_off),m:method,t:new Date().toLocaleString('zh-CN'),c:S.contactVal||'',cp:cpCode||''}); if(S.orders.length>50)S.orders.length=50; pushShop(); }catch(e){}
     $('sheet').innerHTML='<div class="t">支付成功</div>'+
       '<div style="font-size:12px;color:#8b97ab;margin:6px 0 12px">订单号 '+no+' · '+(method==='wechat'?'微信支付':'支付宝')+(S.contactVal?(' · '+esc(S.contactVal)):'')+'</div>'+
       '<div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:12px;color:#8b97ab">商品</div>'+
@@ -813,31 +836,32 @@ function buySheet(p){
     $('closeSheet').onclick=function(){$('mask').classList.remove('on')};
   }
   $('mask').classList.add('on');draw();
-  setTimeout(function(){
-    var row=document.getElementById('cpRow');
-    if(row)row.onclick=function(){cpOn=!cpOn;cpOk=false;draw();};
-    var use=document.getElementById('cpUse');
-    if(use)use.onclick=function(){
-      var i=document.getElementById('cpCode');cpCode=i?(i.value||'').trim():'';
-      var c=findCp(cpCode);
-      var off=c?Math.min(Number(c.a||0),Number(p.price)||0):0;
-      if(!c||(Number(c.u||0))>=300||off<=0){cpOk=false;cpAmt=0;toast('优惠券不正确或输入错了，请重新输入');draw();return}
-      if(cpBusy)return; cpBusy=true;
-      var t=document.getElementById('cpTip'); if(t)t.textContent='正在检测优惠券是否一致…';
-      toast('正在检测优惠券是否一致…');
-      setTimeout(function(){
-        toast('检测一致，正在减去 '+yuan(off)+' 元…');
-        var t2=document.getElementById('cpTip'); if(t2)t2.textContent='正在减去 '+yuan(off)+' 元中…';
-        setTimeout(function(){
-          cpBusy=false; cpAmt=off; cpOk=true;
-          draw();
-          toast('减去完成，已减去 '+yuan(off)+' 元');
-        },900);
-      },900);
-    };
-  },0);
 }
-if($('lookupBtn'))$('lookupBtn').onclick=function(){toast('请凭订单号联系商家查询，或在 App 内查看订单')};
+if($('lookupBtn'))$('lookupBtn').onclick=function(){
+  var h='<div class="t">订单查询</div>'+
+    '<div style="font-size:13px;color:#6b7a92;margin:8px 0 8px">订单号 / 联系方式</div>'+
+    '<input id="lkIn" placeholder="MH 开头的订单号，或 6 位联系方式" style="width:100%;box-sizing:border-box;border-radius:12px;border:1px solid #e7ebf3;background:#fff;padding:12px 14px;font-size:14px">'+
+    '<button class="btn'+(S.style==='blue'?' ':' pink')+'" id="lkGo" style="margin-top:12px">查 询</button>'+
+    '<div id="lkOut" style="margin-top:12px"></div>';
+  $('sheet').innerHTML=h; $('mask').classList.add('on');
+  $('lkGo').onclick=function(){
+    var q=((document.getElementById('lkIn').value)||'').trim().toUpperCase();
+    if(!q){toast('先输入订单号或联系方式');return}
+    var arr=S.orders||[];
+    var r=arr.filter(function(o){return String(o.no||'').toUpperCase()===q})[0]||arr.filter(function(o){return q.length===6&&String(o.c||'')===q})[0];
+    if(!r){document.getElementById('lkOut').innerHTML='<div style="background:#fff8f8;border:1px solid #ffe0e0;border-radius:12px;padding:14px;font-size:13px;color:#c04a4a;text-align:center">没有查到这笔订单，请核对订单号</div>';return}
+    document.getElementById('lkOut').innerHTML='<div style="background:#fff;border:1px solid #eef1f7;border-radius:14px;overflow:hidden">'+
+      '<div style="padding:12px 14px;border-bottom:1px solid #f3f5f9"><div style="font-size:12px;color:#8b97ab">订单号</div><b style="font-size:14px">'+esc(r.no)+'</b></div>'+
+      '<div style="padding:12px 14px;border-bottom:1px solid #f3f5f9;display:flex;justify-content:space-between;font-size:13px"><span style="color:#8b97ab">商品</span><b>'+esc(r.prod||'')+'</b></div>'+
+      '<div style="padding:12px 14px;border-bottom:1px solid #f3f5f9;display:flex;justify-content:space-between;font-size:13px"><span style="color:#8b97ab">实付</span><b>¥'+yuan(r.pay!=null?r.pay:r.price||0)+'</b></div>'+
+      '<div style="padding:12px 14px;border-bottom:1px solid #f3f5f9;display:flex;justify-content:space-between;font-size:13px"><span style="color:#8b97ab">支付方式</span><b>'+(r.m==='wechat'?'微信支付':'支付宝')+'</b></div>'+
+      '<div style="padding:12px 14px;border-bottom:1px solid #f3f5f9;display:flex;justify-content:space-between;font-size:13px"><span style="color:#8b97ab">下单时间</span><span>'+esc(r.t||'')+'</span></div>'+
+      '<div style="padding:12px 14px"><div style="font-size:12px;color:#8b97ab;margin-bottom:6px">卡密</div><div class="keybox'+(S.style==='blue'?' wrap':'')+'" id="lkKey" style="word-break:break-all">'+esc(r.key||'')+'</div>'+
+      '<button class="btn" id="lkCopy" style="margin-top:10px">复制卡密</button></div>'+
+      '</div>';
+    document.getElementById('lkCopy').onclick=function(){copyText(r.key||'')};
+  };
+};
 if($('searchBtn'))$('searchBtn').onclick=function(){
   if(searchQ){ searchQ=''; renderChips(); toast('已回到全部商品'); return }
   $('sheet').innerHTML='<div class="t">搜索商品</div>'+
