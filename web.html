@@ -215,6 +215,9 @@ $('toReg').onclick=function(){
 function showDlg(html){var m=document.createElement('div');m.className='mask';m.innerHTML='<div class="dlg">'+html+'</div>';document.body.appendChild(m);return m}
 function jumpAuth(){
   var rid='r'+Date.now()+Math.floor(Math.random()*900);
+  clearAcc();
+  $('login').style.display='none';
+  $('app').classList.remove('on');
   $('jump').classList.add('on');
   $('jTitle').textContent='正在跳转到漫花鹿Pro 授权登录中';
   $('jSub').textContent='请在漫花鹿Pro 里点「授权登录」，这里会自动完成';
@@ -245,7 +248,9 @@ function jumpAuth(){
   },1200);
 }
 var qs=new URLSearchParams(location.search);
+var a0=acc();
 if(qs.get('auth')==='1'){jumpAuth()}
+else if(a0&&a0.user&&a0.token){enterApp()}
 
 var TAB='home';
 function enterApp(){
@@ -359,8 +364,6 @@ function checkUpdate(manual){
 }
 $('updGo').onclick=function(){$('upd').classList.remove('on');location.reload()};
 
-var a0=acc();
-if(a0&&a0.user&&a0.token){enterApp()}
 </script>
 </body>
 </html>
