@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>漫花鹿Pro · 音乐</title><link rel="icon" href="appicon.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0f1216;color:#e9edf5;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{width:min(88vw,360px);background:#171a21;border:1px solid #2a2f3a;border-radius:20px;padding:22px 20px 18px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.art{width:120px;height:120px;margin:0 auto 16px;border-radius:50%;background:linear-gradient(135deg,#2f6df6,#7fb3ff);display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;box-shadow:0 10px 30px rgba(47,109,246,.35)}
+.art.on{animation:sp 14s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.t{text-align:center;font-size:17px;font-weight:700;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s{text-align:center;font-size:12px;color:#8b94a6;margin-bottom:16px}
+.bar{height:6px;border-radius:6px;background:#232833;position:relative;overflow:hidden;margin-bottom:10px}
+.bar>i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#2f6df6,#7fb3ff)}
+.time{display:flex;justify-content:space-between;font-size:11px;color:#7f8798;margin-bottom:14px}
+.acts{display:flex;align-items:center;justify-content:center;gap:16px}
+.pp{width:56px;height:56px;border-radius:50%;border:0;background:#f2f5fb;color:#11151c;font-size:20px;font-weight:700}
+.sm{width:40px;height:40px;border-radius:50%;border:1px solid #2f3543;background:#1d222b;color:#aeb7c7;font-size:14px}
+</style></head><body>
+<div class="card">
+  <div class="art" id="art">♪</div>
+  <div class="t" id="tt">海屿你</div>
+  <div class="s" id="ss">漫花鹿Pro · 本地音频</div>
+  <div class="bar"><i id="bp"></i></div>
+  <div class="time"><span id="cur">00:00</span><span id="dur">00:00</span></div>
+  <div class="acts">
+    <button class="sm" id="back">-10s</button>
+    <button class="pp" id="pp">▶</button>
+    <button class="sm" id="fwd">+10s</button>
+  </div>
+</div>
+<script>
+var Q=new URLSearchParams(location.search);
+var f=Q.get('f')||'haoyuni.mp3';
+var nm=Q.get('n')||'海屿你';
+var A=new Audio('./'+f);A.preload='auto';A.loop=true;
+var art=document.getElementById('art'),tt=document.getElementById('tt'),bp=document.getElementById('bp'),cur=document.getElementById('cur'),dur=document.getElementById('dur'),pp=document.getElementById('pp');
+tt.textContent=nm;
+function fmt(s){s=Math.floor(s||0);return (s<600?'0':'')+Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+A.addEventListener('loadedmetadata',function(){dur.textContent=fmt(A.duration)});
+A.addEventListener('timeupdate',function(){cur.textContent=fmt(A.currentTime);if(A.duration)bp.style.width=(A.currentTime/A.duration*100)+'%'});
+A.addEventListener('play',function(){pp.textContent='❚❚';art.classList.add('on')});
+A.addEventListener('pause',function(){pp.textContent='▶';art.classList.remove('on')});
+pp.onclick=function(){if(A.paused){A.play().catch(function(){})}else A.pause()};
+document.getElementById('back').onclick=function(){A.currentTime=Math.max(0,A.currentTime-10)};
+document.getElementById('fwd').onclick=function(){A.currentTime=Math.min(A.duration||0,A.currentTime+10)};
+A.play().catch(function(){});
+document.addEventListener('click',function once(){A.play().catch(function(){});document.removeEventListener('click',once)});
+</script></body></html>
