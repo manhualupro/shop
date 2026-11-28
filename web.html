@@ -132,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 </div>
 
 <div id="app">
-  <div class="pg-top"><div class="tt" id="pgTitle">主页</div><div class="rt" id="pgVer">v1.7.91</div></div>
+  <div class="pg-top"><div class="tt" id="pgTitle">主页</div><div class="rt" id="pgVer">v1.8.02</div></div>
   <div id="pages"></div>
   <div class="nav">
     <button class="nv on" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg>主页</button>
@@ -146,7 +146,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 <div class="upd" id="upd">
   <div class="upd-card">
     <h3>发现新版本</h3>
-    <div class="uv" id="updV">最新版本 1.7.91</div>
+    <div class="uv" id="updV">最新版本 1.8.02</div>
     <div class="ut" id="updT"></div>
     <div class="ub">
       <a class="ub-dl" id="updDl" href="#" target="_blank" rel="noopener">下载 APK 软件版</a>
@@ -159,7 +159,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 var CLOUD='https://manhualu-cloud.netlify.app';
 var SB='https://fjarlttqnznykmvlsxma.supabase.co/rest/v1';
 var KEY='sb_publishable_2SUA34qjRy_yB_AgMYW81A_2KTzfL94';
-var CUR={ver:'1.7.91',apk:'https://aka.doubaocdn.com/s/IUQTjW0XAo',note:''};
+var CUR={ver:'1.8.02',apk:'https://aka.doubaocdn.com/s/IUQTjW0XAo',note:''};
 var DB=null,CURSHOP=null;
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -177,7 +177,7 @@ function sb(path,opt){
     fetch(CLOUD+'/pub',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
       var el=document.getElementById('pubAnn');
       if(!el||!j||!j.notice)return;
-      el.innerHTML='<b style="color:#2f6df6">店铺公告</b><br>'+esc(j.notice).replace(/\n/g,'<br>');
+      el.innerHTML='<b style="color:#2f6df6">进服公告</b><br>'+esc(j.notice).replace(/\n/g,'<br>');
       el.style.display='block';
     }).catch(function(){});
   }
@@ -359,6 +359,25 @@ function checkUpdate(manual){
   }).catch(function(){if(manual)toast('检查更新失败')});
 }
 $('updGo').onclick=function(){$('upd').classList.remove('on');location.reload()};
+/* 启动：永远先显示登录页；有上次账号给一个免密入口；同时校验线上版本号 */
+(function(){
+  fetch(CLOUD+'/pub',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+    if(j&&j.ver){CUR.ver=j.ver;if(j.apk)CUR.apk=j.apk;var el=$('pgVer');if(el)el.textContent='v'+j.ver;}
+  }).catch(function(){});
+  var a=acc();
+  if(a&&a.token&&a.user){
+    var card=document.querySelector('.auth-card');
+    if(card&&!card.querySelector('.quick')){
+      var b=document.createElement('button');
+      b.className='btn ghost quick';b.textContent='上次登录：'+a.user+' · 免密进入';
+      b.onclick=function(){enterApp()};
+      card.appendChild(b);
+    }
+  }
+  var lg=$('login');if(lg){lg.style.display='block'}
+  $('app').classList.remove('on');
+})();
+
 
 </script>
 </body>
