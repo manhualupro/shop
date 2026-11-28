@@ -119,6 +119,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
         <input class="input" id="ap" type="password" placeholder="请输入密码" autocomplete="current-password"></div>
       <button class="btn" id="doLogin">登 录</button>
       <button class="btn ghost" id="toReg">没有账号？注册新账号</button>
+      <div class="field"><label class="label">邮箱验证码登录</label>
+        <input class="input" id="ce" placeholder="邮箱地址" inputmode="email"></div>
+      <div class="field" style="display:flex;gap:8px">
+        <input class="input" id="cc" placeholder="6 位验证码" style="flex:1 1 auto" inputmode="numeric">
+        <button class="btn" id="sendCode" style="width:auto;padding:0 14px">获取</button></div>
+      <button class="btn ghost" id="doCode">验证码登录</button>
     </div>
     <div id="pubAnn" style="display:none;margin:0 0 12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.95);box-shadow:0 6px 18px rgba(40,70,140,.10);font-size:12.5px;line-height:1.6;color:#3a4152;text-align:left"></div>
     <div class="auth-badges"><span>液态玻璃</span><span>自助开店</span><span>卡密发货</span></div>
@@ -198,6 +204,22 @@ function login(u,p){
     enterApp();
   }).catch(function(){toast('网络不通，稍后再试')});
 }
+
+/* 邮箱验证码登录 */
+$('sendCode').onclick=function(){
+  var e=($('ce').value||'').trim();
+  if(!e||e.indexOf('@')<0){toast('先填邮箱');return}
+  cFetch('/sendcode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e})})
+    .then(function(r){toast((r&&r.msg)||'验证码已发送')}).catch(function(){toast('网络不通')});
+};
+$('doCode').onclick=function(){
+  var e=($('ce').value||'').trim(),c=($('cc').value||'').trim();
+  if(!e||!c){toast('填邮箱和验证码');return}
+  cFetch('/codeLogin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,code:c})})
+    .then(function(r){ if(!r||!r.ok){toast((r&&r.msg)||'验证码不对');return}
+      setAcc({user:r.username,token:r.token,at:Date.now()});toast('登录成功');enterApp();})
+    .catch(function(){toast('网络不通')});
+};
 $('doLogin').onclick=function(){login($('au').value,$('ap').value)};
 $('ap').addEventListener('keydown',function(e){if(e.key==='Enter')login($('au').value,$('ap').value)});
 $('toReg').onclick=function(){
