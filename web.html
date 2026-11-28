@@ -221,10 +221,19 @@ function startAuth(){
   var rid='r'+Date.now()+Math.floor(Math.random()*900);
   clearAcc();
   var sub=document.querySelector('.auth-app .tx');
-  if(sub)sub.innerHTML='<b>正在打开漫花鹿Pro…</b>请在 APP 里点「授权登录」';
+  if(sub)sub.innerHTML='<b>已发送授权请求</b>请在漫花鹿Pro 里点「授权登录」';
   sb('/shop',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify([{k:'webauth',data:{st:'wait',rid:rid,at:Date.now()}}])});
-  try{location.href='intent://node#Intent;package=com.manhualu.pro;end'}catch(e){}
+  try{location.href='manhualupro://open'}catch(e){}
+  setTimeout(function(){
+    try{
+      var ifr=document.createElement('iframe');
+      ifr.style.display='none';
+      ifr.src='intent://open#Intent;scheme=manhualupro;package=com.manhualu.pro;end';
+      document.body.appendChild(ifr);
+      setTimeout(function(){try{ifr.remove()}catch(e){}},1500);
+    }catch(e){}
+  },700);
   var iv=setInterval(function(){
     sb('/shop?select=data&k=eq.webauth').then(function(rows){
       var d=(rows&&rows[0]&&rows[0].data)||{};
